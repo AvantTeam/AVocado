@@ -1,0 +1,12 @@
+prefix=@PREFIX@
+exec_prefix=@EXEC_PREFIX@
+libdir=@LIB_DIR@
+includedir=@INCLUDE_DIR@
+
+Name: @PROJECT@
+Description: @DESCRIPTION@
+Version: @VERSION@
+
+Requires:
+Libs: -L${libdir} -l@PROJECT@
+Cflags: -I${includedir}
