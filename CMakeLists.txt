@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-
-project(AvCompage
-    VERSION 0.0.1
-    DESCRIPTION ...
-    LANGUAGES CXX
-)
+project(AvCompage LANGUAGES CXX)
 
 option(BUILD_SHARED_LIBS "Build shared library" OFF)
 
@@ -23,16 +18,14 @@ foreach(SUBMODULE avcore)
     set(EXEC_PREFIX ${CMAKE_INSTALL_FULL_BINDIR})
     set(LIB_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
     set(INCLUDE_DIR ${CMAKE_INSTALL_FULL_INCLUDEDIR})
-
-    set(VERSION ${PROJECT_VERSION})
-    set(CONFIG_RESULT ${CMAKE_CURRENT_BINARY_DIR}/${SUBMODULE}.pc)
+    
     configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/in/${SUBMODULE}.pc.in
-        ${CONFIG_RESULT}
+        ${CMAKE_CURRENT_BINARY_DIR}/${SUBMODULE}.pc
     )
 
     install(
-        FILES ${CONFIG_RESULT}
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/${SUBMODULE}.pc
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
     )
 
@@ -44,7 +37,7 @@ foreach(SUBMODULE avcore)
 
     write_basic_package_version_file(
         ${SUBMODULE}-config-version.cmake
-        VERSION ${PROJECT_VERSION}
+        VERSION ${VERSION}
         COMPATIBILITY SameMajorVersion
     )
 

@@ -20,6 +20,7 @@ namespace av {
         SDL_Window *window;
         SDL_GLContext context;
 
+
         public:
         app(const app &copy) = delete;
         app(const app_config &config);
