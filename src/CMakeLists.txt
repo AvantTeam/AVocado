@@ -4,6 +4,7 @@ find_package(SDL2 CONFIG REQUIRED)
 set(CORE_HEADERS
     ../include/glad/glad.h
     ../include/av/core/app.hpp
+    ../include/av/core/util/task_queue.hpp
 )
 
 set(CORE_SOURCES
@@ -14,6 +15,7 @@ set(CORE_SOURCES
 add_library(avcore ${CORE_HEADERS} ${CORE_SOURCES})
 add_library(AvCompage::avcore ALIAS avcore)
 
+target_compile_features(avcore PUBLIC cxx_std_17)
 target_include_directories(avcore
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

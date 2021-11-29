@@ -1,4 +1,4 @@
 @PACKAGE_INIT@
 
-include("${CMAKE_CURRENT_LIST_DIR}/avcore-targets.cmake")
-check_required_components("avcore")
+include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT@-targets.cmake")
+check_required_components("@PROJECT@")
