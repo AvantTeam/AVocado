@@ -1,6 +1,6 @@
-find_package(glad REQUIRED)
-find_package(glm REQUIRED)
-find_package(SDL2 REQUIRED)
+find_package(glad CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
 
 set(CORE_HEADERS
     ../include/av/core/app.hpp
