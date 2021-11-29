@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(AvCompage LANGUAGES CXX)
+project(AvCompage LANGUAGES C CXX)
 
 option(BUILD_SHARED_LIBS "Build shared library" OFF)
 

@@ -1,12 +1,13 @@
-find_package(glad CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 
 set(CORE_HEADERS
+    ../include/glad/glad.h
     ../include/av/core/app.hpp
 )
 
 set(CORE_SOURCES
+    glad.c
     core/app.cpp
 )
 
@@ -23,7 +24,7 @@ target_include_directories(avcore
 
 target_link_libraries(avcore
     PUBLIC
-        glad::glad glm::glm
+        glm::glm
         SDL2::SDL2main SDL2::SDL2
 )
 

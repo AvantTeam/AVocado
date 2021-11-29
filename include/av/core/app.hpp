@@ -1,9 +1,9 @@
 #ifndef AV_CORE_APP_HPP
 #define AV_CORE_APP_HPP
 
-#include <SDL.h>
-#include <glad/glad.h>
+#include "glad/glad.h"
 
+#include <SDL.h>
 #include <string>
 
 namespace av {
@@ -19,12 +19,14 @@ namespace av {
         private:
         SDL_Window *window;
         SDL_GLContext context;
-
+        const app_config &config;
 
         public:
         app(const app &copy) = delete;
         app(const app_config &config);
         ~app();
+
+        bool init();
     };
 }
 
