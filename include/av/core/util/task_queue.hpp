@@ -1,5 +1,5 @@
-#ifndef AV_CORE_UTIL_TASK_QUEUE_HPP
-#define AV_CORE_UTIL_TASK_QUEUE_HPP
+#ifndef AV_CORE_UTIL_TASKQUEUE_HPP
+#define AV_CORE_UTIL_TASKQUEUE_HPP
 
 #include <functional>
 #include <mutex>
@@ -9,7 +9,6 @@ namespace av {
     template<typename T_ret_type = void, typename... T_args>
     class task_queue {
         typedef std::function<T_ret_type(T_args...)> T_func;
-        static constexpr bool is_void = std::is_void<T_ret_type>::value;
 
         std::vector<T_func> queue;
         std::recursive_mutex lock;
@@ -21,8 +20,8 @@ namespace av {
             lock.unlock();
         }
 
-        template<typename T = void>
-        void run(T_args... args, const std::function<T(std::conditional_t<is_void, int, T_ret_type>)> &listener = {}) {
+        template<auto T_listener = 0>
+        void run(const T_args &... args) {
             lock.lock();
             if(queue.empty()) {
                 lock.unlock();
@@ -33,16 +32,14 @@ namespace av {
             queue.clear();
 
             lock.unlock();
-            if constexpr(!is_void) {
-                for(const T_func &func : runs) {
-                    T_ret_type &result = func(args...);
-                    listener(result);
-                }
-            } else {
+            if constexpr(!T_listener) {
                 for(const T_func &func : runs) func(args...);
+            } else {
+                //TODO non-static member function
+                for(const T_func &func : runs) T_listener(func(args...));
             }
         }
     };
 }
 
-#endif
+#endif // !AV_CORE_UTIL_TASKQUEUE_HPP

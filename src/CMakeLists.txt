@@ -1,8 +1,9 @@
-find_package(glm CONFIG REQUIRED)
-find_package(SDL2 CONFIG REQUIRED)
+find_package(glm REQUIRED)
+find_package(SDL2 REQUIRED)
 
 set(CORE_HEADERS
     ../include/glad/glad.h
+    ../include/KHR/khrplatform.h
     ../include/av/core/app.hpp
     ../include/av/core/util/task_queue.hpp
 )
@@ -12,8 +13,8 @@ set(CORE_SOURCES
     core/app.cpp
 )
 
-add_library(avcore ${CORE_HEADERS} ${CORE_SOURCES})
-add_library(AvCompage::avcore ALIAS avcore)
+add_library(avcore ${CORE_SOURCES})
+add_library(AVocado::avcore ALIAS avcore)
 
 target_compile_features(avcore PUBLIC cxx_std_17)
 target_include_directories(avcore
@@ -30,7 +31,9 @@ target_link_libraries(avcore
         SDL2::SDL2main SDL2::SDL2
 )
 
-install(
-    FILES ${CORE_HEADERS}
-    DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/av
-)
+foreach(HEADER ${CORE_HEADERS})
+    string(REGEX REPLACE "[^\\/]+$" "" HEADER_DIR ${HEADER})
+    install(FILES ${HEADER}
+        DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/${HEADER_DIR}
+    )
+endforeach()

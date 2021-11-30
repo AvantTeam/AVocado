@@ -4,7 +4,7 @@ libdir=@LIB_DIR@
 includedir=@INCLUDE_DIR@
 
 Name: @PROJECT@
-Description: @DESCRIPTION@
+Description: The main module of the AVocado framework.
 Version: @VERSION@
 
 Requires:

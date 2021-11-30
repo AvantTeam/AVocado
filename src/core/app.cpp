@@ -3,11 +3,7 @@
 #include <stdexcept>
 
 namespace av {
-    app::app():
-        window(nullptr),
-        context(nullptr),
-        exitting(false) {}
-
+    app::app(): window(nullptr), context(nullptr), exitting(false) {}
     app::~app() {
         if(context) SDL_GL_DeleteContext(context);
         if(window) SDL_DestroyWindow(window);
@@ -30,8 +26,8 @@ namespace av {
         SDL_Log("Initialized SDL v%d.%d.%d.", ver.major, ver.minor, ver.patch);
 
         SDL_GL_LoadLibrary(nullptr);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, config.gl_major);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, config.gl_minor);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
         unsigned int flags = SDL_WINDOW_OPENGL;
         if(config.shown) flags |= SDL_WINDOW_SHOWN;
@@ -57,7 +53,7 @@ namespace av {
         SDL_Log("Initialized OpenGL v%d.%d.", GLVersion.major, GLVersion.minor);
         
         if(config.vsync) SDL_GL_SetSwapInterval(1);
-        return true;
+        return listen<&app_listener::s_init>();
     }
 
     bool app::loop() {
@@ -67,5 +63,11 @@ namespace av {
         }
         
         run_posts();
+        while(!exitting) {
+            if(!listen<&app_listener::s_update>()) return false;
+            SDL_GL_SwapWindow(window);
+        }
+
+        return true;
     }
 }
