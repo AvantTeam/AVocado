@@ -91,7 +91,7 @@ namespace av {
          * @param listener The pointer to the application listener.
          */
         inline void remove_listener(app_listener *const &listener) {
-            post([=](app &) {
+            post([&](app &) {
                 listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
             });
         }
