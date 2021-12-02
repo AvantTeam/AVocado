@@ -2,11 +2,13 @@
 #define AV_CORE_APP_HPP
 
 #include "glad/glad.h"
+#include "service.hpp"
 #include "util/task_queue.hpp"
 
 #include <SDL.h>
 #include <algorithm>
 #include <functional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -41,10 +43,13 @@ namespace av {
             listener.update(application);
         }
     };
-    
+
     /**
      * @brief A non copy-constructible class defining an application. Should only be instantiated once. Holds an SDL
      * window, an OpenGL context, and dynamic listeners.
+     * 
+     * Applications must be instantiated by setting up the instance in `av::service` simply by invoking `av::service::app::set()`,
+     * as opposed to be manually instantiated. Call `av::service::app::reset()` after usage.
      */
     class app {
         /** @brief The SDL window this application holds. Initialized in `init(const app_config &)`. */
@@ -73,9 +78,9 @@ namespace av {
 
         /**
          * @brief Adds an arbitrary application listener. Typically invoked before `init()`. Use with caution.
-         * @param listener - The pointer to the application listener. This is all yours and won't be destructed in any of
-         *                   the application class' codes, though you must make sure it is not destructed until `loop()`
-         *                   returns.
+         * @param listener The pointer to the application listener. This is all yours and won't be destructed in any of
+         *                 the application class' codes, though you must make sure it is not destructed until `loop()`
+         *                 returns.
          */
         inline void add_listener(app_listener *const &listener) {
             listeners.push_back(listener);
@@ -83,7 +88,7 @@ namespace av {
         /**
          * @brief Removes an application listener from the list. When called inside `loop()`, it will be removed in the
          * next frame. Note that this does not destroy the listener itself, it is your responsibility to do such.
-         * @param listener - The pointer to the application listener.
+         * @param listener The pointer to the application listener.
          */
         inline void remove_listener(app_listener *const &listener) {
             post([=](app &) {
@@ -93,11 +98,11 @@ namespace av {
 
         /**
          * @brief Initializes the application, creating an SDL window and an OpenGL context.
-         * @param config - The application configuration.
-         * 
+         * @param config The application configuration.
+         *
          * @return `true` if succeeded and both the window and context are successfully created, `false` otherwise.
          */
-        bool init(const app_config &config);
+        bool init(const app_config &config = {});
         /**
          * @brief Initializes the application loop. `init()` must be successfully invoked prior to this function. This
          * function won't return until `exitting` is `true`.
@@ -123,15 +128,13 @@ namespace av {
 
         /**
          * @brief Invokes a function on all the application listeners.
-         * @param T_func - The function, should be in a signature of `T(app_listener &, app &, ...)`.
-         *
+         * @param T_func The function, in a signature of `void(app_listener &, app &)`.
          * @return `true` if all the function is successfully invoked to all the listeners, `false` if one or more of
          * the listeners threw an exception.
          */
-        template<auto T_func, typename... T_args>
-        inline bool listen(const T_args &... args) {
+        inline bool accept(const std::function<void(app_listener &, app &)> &acceptor) {
             try {
-                for(app_listener *const &listener : listeners) T_func(*listener, *this, args...);
+                for(app_listener *const &listener : listeners) acceptor(*listener, *this);
             } catch(std::exception &e) {
                 SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, e.what());
                 return false;
@@ -142,7 +145,7 @@ namespace av {
 
         /**
          * @brief Submits a function that will run at the end of the frame in `loop()`.
-         * @param function - The lambda `void` function accepting `app &` parameter.
+         * @param function The lambda `void` function accepting `app &` parameter.
          */
         inline void post(const std::function<void(app &)> &function) {
             posts.submit(function);

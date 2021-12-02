@@ -1,0 +1,16 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+if(TARGET AVocado::avcore)
+    if(NOT TARGET glm::glm)
+        find_dependency(glm REQUIRED)
+    endif()
+
+    if(NOT TARGET SDL2::SDL2)
+        find_dependency(SDL2 REQUIRED)
+    endif()
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/AVocadoTargets.cmake")
+check_required_components(Avcore)

@@ -1,7 +1,5 @@
 #include "av/core/app.hpp"
 
-#include <stdexcept>
-
 namespace av {
     app::app(): window(nullptr), context(nullptr), exitting(false) {}
     app::~app() {
@@ -20,7 +18,7 @@ namespace av {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
             return false;
         }
-
+        
         SDL_version ver;
         SDL_GetVersion(&ver);
         SDL_Log("Initialized SDL v%d.%d.%d.", ver.major, ver.minor, ver.patch);
@@ -53,7 +51,7 @@ namespace av {
         SDL_Log("Initialized OpenGL v%d.%d.", GLVersion.major, GLVersion.minor);
         
         if(config.vsync) SDL_GL_SetSwapInterval(1);
-        return listen<&app_listener::s_init>();
+        return accept(&app_listener::s_init);
     }
 
     bool app::loop() {
@@ -64,7 +62,9 @@ namespace av {
         
         run_posts();
         while(!exitting) {
-            if(!listen<&app_listener::s_update>()) return false;
+            if(!accept(&app_listener::s_init)) return false;
+
+            run_posts();
             SDL_GL_SwapWindow(window);
         }
 

@@ -30,74 +30,42 @@ foreach(SUBMODULE avcore)
         FILES ${CMAKE_CURRENT_BINARY_DIR}/${SUBMODULE}.pc
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
     )
-
-    install(TARGETS ${SUBMODULE}
-        EXPORT ${SUBMODULE}-targets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-
-    write_basic_package_version_file(
-        ${SUBMODULE}-config-version.cmake
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion
-    )
-
-    configure_package_config_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/in/${SUBMODULE}-config.cmake.in
-        ${SUBMODULE}-config.cmake
-        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${SUBMODULE}
-    )
-
-    export(EXPORT ${SUBMODULE}-targets
-        FILE ${CMAKE_CURRENT_BINARY_DIR}/${SUBMODULE}-targets.cmake
-        NAMESPACE AVocado::
-    )
-
-    install(EXPORT ${SUBMODULE}-targets
-        FILE ${SUBMODULE}-targets.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${SUBMODULE}
-        NAMESPACE AVocado::
-    )
-
-    install(
-        FILES
-            ${PROJECT_BINARY_DIR}/${SUBMODULE}-config.cmake
-            ${PROJECT_BINARY_DIR}/${SUBMODULE}-config-version.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${SUBMODULE}
-    )
 endforeach()
 
 install(TARGETS avcore
-    EXPORT AVocado-targets
+    EXPORT AVocadoTargets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-export(EXPORT AVocado-targets
+export(EXPORT AVocadoTargets
+    FILE AVocadoTargets.cmake
     NAMESPACE AVocado::
-    FILE AVocado-targets.cmake
 )
 
-install(EXPORT AVocado-targets
+install(EXPORT AVocadoTargets
+    FILE AVocadoTargets.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/AVocado
     NAMESPACE AVocado::
 )
 
 write_basic_package_version_file(
-    AVocado-config-version.cmake
+    AVocadoConfigVersion.cmake
     COMPATIBILITY SameMajorVersion
 )
 
 configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/in/AVocado-config.cmake.in
-    AVocado-config.cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/in/AVocadoConfig.cmake.in
+    AVocadoConfig.cmake
     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/AVocado
 )
 
-install(FILES ${PROJECT_BINARY_DIR}/AVocado-config.cmake ${PROJECT_BINARY_DIR}/AVocado-config-version.cmake
+install(FILES ${PROJECT_BINARY_DIR}/AVocadoConfig.cmake ${PROJECT_BINARY_DIR}/AVocadoConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/AVocado
 )
+
+export(PACKAGE AVocado)
 
 if(${BUILD_TESTS})
     add_subdirectory(tests)

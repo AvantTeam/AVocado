@@ -1,4 +1,5 @@
 find_package(glm REQUIRED)
+find_package(EnTT REQUIRED)
 find_package(SDL2 REQUIRED)
 
 set(CORE_HEADERS
@@ -27,7 +28,7 @@ target_include_directories(avcore
 
 target_link_libraries(avcore
     PUBLIC
-        glm::glm
+        glm::glm EnTT::EnTT
         SDL2::SDL2main SDL2::SDL2
 )
 
