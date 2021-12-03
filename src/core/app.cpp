@@ -1,7 +1,6 @@
 #include "av/core/app.hpp"
 
 namespace av {
-    app::app(): window(nullptr), context(nullptr), exitting(false) {}
     app::~app() {
         if(context) SDL_GL_DeleteContext(context);
         if(window) SDL_DestroyWindow(window);
@@ -51,7 +50,7 @@ namespace av {
         SDL_Log("Initialized OpenGL v%d.%d.", GLVersion.major, GLVersion.minor);
         
         if(config.vsync) SDL_GL_SetSwapInterval(1);
-        return accept(&app_listener::s_init);
+        return accept([](auto &listener, auto &app) { listener.init(app); });
     }
 
     bool app::loop() {
@@ -62,7 +61,23 @@ namespace av {
         
         run_posts();
         while(!exitting) {
-            if(!accept(&app_listener::s_init)) return false;
+            SDL_Event e;
+            while(SDL_PollEvent(&e)) {
+                if(e.type == SDL_QUIT) {
+                    exitting = true;
+                } else {
+                    input.read(e);
+                }
+            }
+
+            try {
+                input.update();
+            } catch(std::exception &e) {
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, e.what());
+                return false;
+            }
+
+            if(!accept([](auto &listener, auto &app) { listener.update(app); })) return false;
 
             run_posts();
             SDL_GL_SwapWindow(window);

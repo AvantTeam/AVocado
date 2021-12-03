@@ -2,10 +2,11 @@
 #define AV_CORE_APP_HPP
 
 #include "glad/glad.h"
+#include "input.hpp"
 #include "service.hpp"
 #include "util/task_queue.hpp"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <algorithm>
 #include <functional>
 #include <stdexcept>
@@ -31,17 +32,9 @@ namespace av {
     struct app_listener {
         /** @brief Called in `app::init(const app_config &)`. */
         virtual void init(app &application) {}
-        /** @brief Convenience function. */
-        static inline void s_init(app_listener &listener, app &application) {
-            listener.init(application);
-        }
 
-        /** Called in `app::loop()`. */
+        /** @brief Called in `app::loop()`. */
         virtual void update(app &application) {}
-        /** @brief Convenience function. */
-        static inline void s_update(app_listener &listener, app &application) {
-            listener.update(application);
-        }
     };
 
     /**
@@ -63,13 +56,16 @@ namespace av {
         /** @brief Whether the main loop in `loop()` should end. */
         bool exitting;
 
+        /** @brief The SDL input event manager of the application. */
+        input_manager input;
+
         public:
         app(const app &) = delete; // Delete the copy-constructor.
         /**
          * @brief Instantiates an empty application. Calls to `init(const app_config &)` and `loop()` respectively are
          * required to run the application. Add application listeners by invoking `add_listener(app_listener *const &)`.
          */
-        app();
+        app(): window(nullptr), context(nullptr), exitting(false) {}
         /**
          * @brief Destroys the application. The OpenGL context the SDL window are destroyed here. The requirement for
          * the application listeners to not be destructed are released.
@@ -117,6 +113,7 @@ namespace av {
         inline void exit() {
             exitting = true;
         }
+
         /** @return The (read-only) SDL window this application holds. */
         inline const SDL_Window *get_window() const {
             return window;
@@ -124,6 +121,14 @@ namespace av {
         /** @return The (read-only) OpenGL context this application holds. */
         inline const SDL_GLContext get_context() const {
             return context;
+        }
+        /** @return The application's input manager. */
+        inline input_manager &get_input() {
+            return input;
+        }
+        /** @return The (read-only) application's input manager. */
+        inline const input_manager &get_input() const {
+            return input;
         }
 
         /**
