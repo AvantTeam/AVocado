@@ -20,14 +20,12 @@
 
 namespace rbp {
 
-	struct RectSize
-	{
+	struct RectSize {
 		int width;
 		int height;
 	};
 
-	struct Rect
-	{
+	struct Rect {
 		int x;
 		int y;
 		int width;
@@ -44,50 +42,44 @@ namespace rbp {
 	int NodeSortCmp(const Rect &a, const Rect &b);
 
 	/// Returns true if a is contained in b.
-	bool IsContainedIn(const Rect &a, const Rect &b)
-	{
-		return a.x >= b.x && a.y >= b.y 
-			&& a.x+a.width <= b.x+b.width 
-			&& a.y+a.height <= b.y+b.height;
+	bool IsContainedIn(const Rect &a, const Rect &b) {
+		return a.x >= b.x && a.y >= b.y
+			&& a.x + a.width <= b.x + b.width
+			&& a.y + a.height <= b.y + b.height;
 	}
 
-	class DisjointRectCollection
-	{
-	public:
+	class DisjointRectCollection {
+		public:
 		std::vector<Rect> rects;
 
-		bool Add(const Rect &r)
-		{
+		bool Add(const Rect &r) {
 			// Degenerate rectangles are ignored.
-			if (r.width == 0 || r.height == 0)
+			if(r.width == 0 || r.height == 0)
 				return true;
 
-			if (!Disjoint(r))
+			if(!Disjoint(r))
 				return false;
 			rects.push_back(r);
 			return true;
 		}
 
-		void Clear()
-		{
+		void Clear() {
 			rects.clear();
 		}
 
-		bool Disjoint(const Rect &r) const
-		{
+		bool Disjoint(const Rect &r) const {
 			// Degenerate rectangles are ignored.
-			if (r.width == 0 || r.height == 0)
+			if(r.width == 0 || r.height == 0)
 				return true;
 
 			for(size_t i = 0; i < rects.size(); ++i)
-				if (!Disjoint(rects[i], r))
+				if(!Disjoint(rects[i], r))
 					return false;
 			return true;
 		}
 
-		static bool Disjoint(const Rect &a, const Rect &b)
-		{
-			if (a.x + a.width <= b.x ||
+		static bool Disjoint(const Rect &a, const Rect &b) {
+			if(a.x + a.width <= b.x ||
 				b.x + b.width <= a.x ||
 				a.y + a.height <= b.y ||
 				b.y + b.height <= a.y)
@@ -96,16 +88,16 @@ namespace rbp {
 		}
 	};
 
-	/** MaxRectsBinPack implements the MAXRECTS data structure and different bin packing algorithms that 
+	/** MaxRectsBinPack implements the MAXRECTS data structure and different bin packing algorithms that
 	use this structure. */
 	int CommonIntervalLength(int i1start, int i1end, int i2start, int i2end) {
-		if (i1end < i2start || i2end < i1start)
+		if(i1end < i2start || i2end < i1start)
 			return 0;
-		return min(i1end, i2end) - max(i1start, i2start);
+		return std::min(i1end, i2end) - std::max(i1start, i2start);
 	}
 
 	class MaxRectsBinPack {
-	public:
+		public:
 		/// Instantiates a bin of size (0,0). Call Init to create a new bin.
 		MaxRectsBinPack(): binWidth(0), binHeight(0) {}
 
@@ -135,8 +127,7 @@ namespace rbp {
 		}
 
 		/// Specifies the different heuristic rules that can be used when deciding where to place a new rectangle.
-		enum FreeRectChoiceHeuristic
-		{
+		enum FreeRectChoiceHeuristic {
 			RectBestShortSideFit, ///< -BSSF: Positions the rectangle against the short side of a free rectangle into which it fits the best.
 			RectBestLongSideFit, ///< -BLSF: Positions the rectangle against the long side of a free rectangle into which it fits the best.
 			RectBestAreaFit, ///< -BAF: Positions the rectangle into the smallest free rect into which it fits.
@@ -149,46 +140,20 @@ namespace rbp {
 		/// @param dst [out] This list will contain the packed rectangles. The indices will not correspond to that of rects.
 		/// @param method The rectangle placement rule to use when packing.
 		void Insert(std::vector<RectSize> &rects, std::vector<Rect> &dst, FreeRectChoiceHeuristic method) {
-			Rect newNode;
-			// Unused in this function. We don't need to know the score after finding the position.
-			int score1 = std::numeric_limits<int>::max();
-			int score2 = std::numeric_limits<int>::max();
-			switch(method)
-			{
-				case RectBestShortSideFit: newNode = FindPositionForNewNodeBestShortSideFit(width, height, score1, score2); break;
-				case RectBottomLeftRule: newNode = FindPositionForNewNodeBottomLeft(width, height, score1, score2); break;
-				case RectContactPointRule: newNode = FindPositionForNewNodeContactPoint(width, height, score1); break;
-				case RectBestLongSideFit: newNode = FindPositionForNewNodeBestLongSideFit(width, height, score2, score1); break;
-				case RectBestAreaFit: newNode = FindPositionForNewNodeBestAreaFit(width, height, score1, score2); break;
-			}
-		
-			if (newNode.height == 0)
-				return newNode;
-
-			PlaceRect(newNode);
-
-			return newNode;
-		}
-
-		/// Inserts a single rectangle into the bin, possibly rotated.
-		Rect Insert(int width, int height, FreeRectChoiceHeuristic method) {
 			dst.clear();
 
-			while(rects.size() > 0)
-			{
+			while(rects.size() > 0) {
 				int bestScore1 = std::numeric_limits<int>::max();
 				int bestScore2 = std::numeric_limits<int>::max();
 				int bestRectIndex = -1;
 				Rect bestNode;
 
-				for(size_t i = 0; i < rects.size(); ++i)
-				{
+				for(size_t i = 0; i < rects.size(); ++i) {
 					int score1;
 					int score2;
 					Rect newNode = ScoreRect(rects[i].width, rects[i].height, method, score1, score2);
 
-					if (score1 < bestScore1 || (score1 == bestScore1 && score2 < bestScore2))
-					{
+					if(score1 < bestScore1 || (score1 == bestScore1 && score2 < bestScore2)) {
 						bestScore1 = score1;
 						bestScore2 = score2;
 						bestNode = newNode;
@@ -196,7 +161,7 @@ namespace rbp {
 					}
 				}
 
-				if (bestRectIndex == -1)
+				if(bestRectIndex == -1)
 					return;
 
 				PlaceRect(bestNode);
@@ -204,6 +169,28 @@ namespace rbp {
 				rects[bestRectIndex] = rects.back();
 				rects.pop_back();
 			}
+		}
+
+		/// Inserts a single rectangle into the bin, possibly rotated.
+		Rect Insert(int width, int height, FreeRectChoiceHeuristic method) {
+			Rect newNode;
+			// Unused in this function. We don't need to know the score after finding the position.
+			int score1 = std::numeric_limits<int>::max();
+			int score2 = std::numeric_limits<int>::max();
+			switch(method) {
+				case RectBestShortSideFit: newNode = FindPositionForNewNodeBestShortSideFit(width, height, score1, score2); break;
+				case RectBottomLeftRule: newNode = FindPositionForNewNodeBottomLeft(width, height, score1, score2); break;
+				case RectContactPointRule: newNode = FindPositionForNewNodeContactPoint(width, height, score1); break;
+				case RectBestLongSideFit: newNode = FindPositionForNewNodeBestLongSideFit(width, height, score2, score1); break;
+				case RectBestAreaFit: newNode = FindPositionForNewNodeBestAreaFit(width, height, score1, score2); break;
+			}
+
+			if(newNode.height == 0)
+				return newNode;
+
+			PlaceRect(newNode);
+
+			return newNode;
 		}
 
 		/// Computes the ratio of used surface area to the total bin area.
@@ -215,7 +202,7 @@ namespace rbp {
 			return (double)usedSurfaceArea / ((uint64_t)binWidth * binHeight);
 		}
 
-	private:
+		private:
 		int binWidth;
 		int binHeight;
 
@@ -235,20 +222,18 @@ namespace rbp {
 			Rect newNode;
 			score1 = std::numeric_limits<int>::max();
 			score2 = std::numeric_limits<int>::max();
-			switch(method)
-			{
-			case RectBestShortSideFit: newNode = FindPositionForNewNodeBestShortSideFit(width, height, score1, score2); break;
-			case RectBottomLeftRule: newNode = FindPositionForNewNodeBottomLeft(width, height, score1, score2); break;
-			case RectContactPointRule: newNode = FindPositionForNewNodeContactPoint(width, height, score1); 
-				score1 = -score1; // Reverse since we are minimizing, but for contact point score bigger is better.
-				break;
-			case RectBestLongSideFit: newNode = FindPositionForNewNodeBestLongSideFit(width, height, score2, score1); break;
-			case RectBestAreaFit: newNode = FindPositionForNewNodeBestAreaFit(width, height, score1, score2); break;
+			switch(method) {
+				case RectBestShortSideFit: newNode = FindPositionForNewNodeBestShortSideFit(width, height, score1, score2); break;
+				case RectBottomLeftRule: newNode = FindPositionForNewNodeBottomLeft(width, height, score1, score2); break;
+				case RectContactPointRule: newNode = FindPositionForNewNodeContactPoint(width, height, score1);
+					score1 = -score1; // Reverse since we are minimizing, but for contact point score bigger is better.
+					break;
+				case RectBestLongSideFit: newNode = FindPositionForNewNodeBestLongSideFit(width, height, score2, score1); break;
+				case RectBestAreaFit: newNode = FindPositionForNewNodeBestAreaFit(width, height, score1, score2); break;
 			}
 
 			// Cannot fit the current rectangle.
-			if (newNode.height == 0)
-			{
+			if(newNode.height == 0) {
 				score1 = std::numeric_limits<int>::max();
 				score2 = std::numeric_limits<int>::max();
 			}
@@ -258,14 +243,11 @@ namespace rbp {
 
 		/// Places the given rectangle into the bin.
 		void PlaceRect(const Rect &node) {
-			for(size_t i = 0; i < freeRectangles.size();)
-			{
-				if (SplitFreeNode(freeRectangles[i], node))
-				{
+			for(size_t i = 0; i < freeRectangles.size();) {
+				if(SplitFreeNode(freeRectangles[i], node)) {
 					freeRectangles[i] = freeRectangles.back();
 					freeRectangles.pop_back();
-				}
-				else
+				} else
 					++i;
 			}
 
@@ -275,7 +257,22 @@ namespace rbp {
 		}
 
 		/// Computes the placement score for the -CP variant.
-		int ContactPointScoreNode(int x, int y, int width, int height) const;
+		int ContactPointScoreNode(int x, int y, int width, int height) const {
+			int score = 0;
+
+			if(x == 0 || x + width == binWidth)
+				score += height;
+			if(y == 0 || y + height == binHeight)
+				score += width;
+
+			for(size_t i = 0; i < usedRectangles.size(); ++i) {
+				if(usedRectangles[i].x == x + width || usedRectangles[i].x + usedRectangles[i].width == x)
+					score += CommonIntervalLength(usedRectangles[i].y, usedRectangles[i].y + usedRectangles[i].height, y, y + height);
+				if(usedRectangles[i].y == y + height || usedRectangles[i].y + usedRectangles[i].height == y)
+					score += CommonIntervalLength(usedRectangles[i].x, usedRectangles[i].x + usedRectangles[i].width, x, x + width);
+			}
+			return score;
+		}
 
 		Rect FindPositionForNewNodeBottomLeft(int width, int height, int &bestY, int &bestX) const {
 			Rect bestNode = {};
@@ -283,14 +280,11 @@ namespace rbp {
 			bestY = std::numeric_limits<int>::max();
 			bestX = std::numeric_limits<int>::max();
 
-			for(size_t i = 0; i < freeRectangles.size(); ++i)
-			{
+			for(size_t i = 0; i < freeRectangles.size(); ++i) {
 				// Try to place the rectangle in upright (non-flipped) orientation.
-				if (freeRectangles[i].width >= width && freeRectangles[i].height >= height)
-				{
+				if(freeRectangles[i].width >= width && freeRectangles[i].height >= height) {
 					int topSideY = freeRectangles[i].y + height;
-					if (topSideY < bestY || (topSideY == bestY && freeRectangles[i].x < bestX))
-					{
+					if(topSideY < bestY || (topSideY == bestY && freeRectangles[i].x < bestX)) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = width;
@@ -299,11 +293,9 @@ namespace rbp {
 						bestX = freeRectangles[i].x;
 					}
 				}
-				if (binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width)
-				{
+				if(binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width) {
 					int topSideY = freeRectangles[i].y + width;
-					if (topSideY < bestY || (topSideY == bestY && freeRectangles[i].x < bestX))
-					{
+					if(topSideY < bestY || (topSideY == bestY && freeRectangles[i].x < bestX)) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = height;
@@ -321,18 +313,15 @@ namespace rbp {
 			bestShortSideFit = std::numeric_limits<int>::max();
 			bestLongSideFit = std::numeric_limits<int>::max();
 
-			for(size_t i = 0; i < freeRectangles.size(); ++i)
-			{
+			for(size_t i = 0; i < freeRectangles.size(); ++i) {
 				// Try to place the rectangle in upright (non-flipped) orientation.
-				if (freeRectangles[i].width >= width && freeRectangles[i].height >= height)
-				{
+				if(freeRectangles[i].width >= width && freeRectangles[i].height >= height) {
 					int leftoverHoriz = abs(freeRectangles[i].width - width);
 					int leftoverVert = abs(freeRectangles[i].height - height);
-					int shortSideFit = min(leftoverHoriz, leftoverVert);
-					int longSideFit = max(leftoverHoriz, leftoverVert);
+					int shortSideFit = std::min(leftoverHoriz, leftoverVert);
+					int longSideFit = std::max(leftoverHoriz, leftoverVert);
 
-					if (shortSideFit < bestShortSideFit || (shortSideFit == bestShortSideFit && longSideFit < bestLongSideFit))
-					{
+					if(shortSideFit < bestShortSideFit || (shortSideFit == bestShortSideFit && longSideFit < bestLongSideFit)) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = width;
@@ -342,15 +331,13 @@ namespace rbp {
 					}
 				}
 
-				if (binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width)
-				{
+				if(binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width) {
 					int flippedLeftoverHoriz = abs(freeRectangles[i].width - height);
 					int flippedLeftoverVert = abs(freeRectangles[i].height - width);
-					int flippedShortSideFit = min(flippedLeftoverHoriz, flippedLeftoverVert);
-					int flippedLongSideFit = max(flippedLeftoverHoriz, flippedLeftoverVert);
+					int flippedShortSideFit = std::min(flippedLeftoverHoriz, flippedLeftoverVert);
+					int flippedLongSideFit = std::max(flippedLeftoverHoriz, flippedLeftoverVert);
 
-					if (flippedShortSideFit < bestShortSideFit || (flippedShortSideFit == bestShortSideFit && flippedLongSideFit < bestLongSideFit))
-					{
+					if(flippedShortSideFit < bestShortSideFit || (flippedShortSideFit == bestShortSideFit && flippedLongSideFit < bestLongSideFit)) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = height;
@@ -368,18 +355,15 @@ namespace rbp {
 			bestShortSideFit = std::numeric_limits<int>::max();
 			bestLongSideFit = std::numeric_limits<int>::max();
 
-			for(size_t i = 0; i < freeRectangles.size(); ++i)
-			{
+			for(size_t i = 0; i < freeRectangles.size(); ++i) {
 				// Try to place the rectangle in upright (non-flipped) orientation.
-				if (freeRectangles[i].width >= width && freeRectangles[i].height >= height)
-				{
+				if(freeRectangles[i].width >= width && freeRectangles[i].height >= height) {
 					int leftoverHoriz = abs(freeRectangles[i].width - width);
 					int leftoverVert = abs(freeRectangles[i].height - height);
-					int shortSideFit = min(leftoverHoriz, leftoverVert);
-					int longSideFit = max(leftoverHoriz, leftoverVert);
+					int shortSideFit = std::min(leftoverHoriz, leftoverVert);
+					int longSideFit = std::max(leftoverHoriz, leftoverVert);
 
-					if (longSideFit < bestLongSideFit || (longSideFit == bestLongSideFit && shortSideFit < bestShortSideFit))
-					{
+					if(longSideFit < bestLongSideFit || (longSideFit == bestLongSideFit && shortSideFit < bestShortSideFit)) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = width;
@@ -389,15 +373,13 @@ namespace rbp {
 					}
 				}
 
-				if (binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width)
-				{
+				if(binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width) {
 					int leftoverHoriz = abs(freeRectangles[i].width - height);
 					int leftoverVert = abs(freeRectangles[i].height - width);
-					int shortSideFit = min(leftoverHoriz, leftoverVert);
-					int longSideFit = max(leftoverHoriz, leftoverVert);
+					int shortSideFit = std::min(leftoverHoriz, leftoverVert);
+					int longSideFit = std::max(leftoverHoriz, leftoverVert);
 
-					if (longSideFit < bestLongSideFit || (longSideFit == bestLongSideFit && shortSideFit < bestShortSideFit))
-					{
+					if(longSideFit < bestLongSideFit || (longSideFit == bestLongSideFit && shortSideFit < bestShortSideFit)) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = height;
@@ -415,19 +397,16 @@ namespace rbp {
 			bestAreaFit = std::numeric_limits<int>::max();
 			bestShortSideFit = std::numeric_limits<int>::max();
 
-			for(size_t i = 0; i < freeRectangles.size(); ++i)
-			{
+			for(size_t i = 0; i < freeRectangles.size(); ++i) {
 				int areaFit = freeRectangles[i].width * freeRectangles[i].height - width * height;
 
 				// Try to place the rectangle in upright (non-flipped) orientation.
-				if (freeRectangles[i].width >= width && freeRectangles[i].height >= height)
-				{
+				if(freeRectangles[i].width >= width && freeRectangles[i].height >= height) {
 					int leftoverHoriz = abs(freeRectangles[i].width - width);
 					int leftoverVert = abs(freeRectangles[i].height - height);
-					int shortSideFit = min(leftoverHoriz, leftoverVert);
+					int shortSideFit = std::min(leftoverHoriz, leftoverVert);
 
-					if (areaFit < bestAreaFit || (areaFit == bestAreaFit && shortSideFit < bestShortSideFit))
-					{
+					if(areaFit < bestAreaFit || (areaFit == bestAreaFit && shortSideFit < bestShortSideFit)) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = width;
@@ -437,14 +416,12 @@ namespace rbp {
 					}
 				}
 
-				if (binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width)
-				{
+				if(binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width) {
 					int leftoverHoriz = abs(freeRectangles[i].width - height);
 					int leftoverVert = abs(freeRectangles[i].height - width);
-					int shortSideFit = min(leftoverHoriz, leftoverVert);
+					int shortSideFit = std::min(leftoverHoriz, leftoverVert);
 
-					if (areaFit < bestAreaFit || (areaFit == bestAreaFit && shortSideFit < bestShortSideFit))
-					{
+					if(areaFit < bestAreaFit || (areaFit == bestAreaFit && shortSideFit < bestShortSideFit)) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = height;
@@ -456,61 +433,143 @@ namespace rbp {
 			}
 			return bestNode;
 		}
-		Rect FindPositionForNewNodeContactPoint(int width, int height, int &contactScore) const {
+		Rect FindPositionForNewNodeContactPoint(int width, int height, int &bestContactScore) const {
 			Rect bestNode = {};
 
-			bestShortSideFit = std::numeric_limits<int>::max();
-			bestLongSideFit = std::numeric_limits<int>::max();
+			bestContactScore = -1;
 
-			for(size_t i = 0; i < freeRectangles.size(); ++i)
-			{
+			for(size_t i = 0; i < freeRectangles.size(); ++i) {
 				// Try to place the rectangle in upright (non-flipped) orientation.
-				if (freeRectangles[i].width >= width && freeRectangles[i].height >= height)
-				{
-					int leftoverHoriz = abs(freeRectangles[i].width - width);
-					int leftoverVert = abs(freeRectangles[i].height - height);
-					int shortSideFit = min(leftoverHoriz, leftoverVert);
-					int longSideFit = max(leftoverHoriz, leftoverVert);
-
-					if (shortSideFit < bestShortSideFit || (shortSideFit == bestShortSideFit && longSideFit < bestLongSideFit))
-					{
+				if(freeRectangles[i].width >= width && freeRectangles[i].height >= height) {
+					int score = ContactPointScoreNode(freeRectangles[i].x, freeRectangles[i].y, width, height);
+					if(score > bestContactScore) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = width;
 						bestNode.height = height;
-						bestShortSideFit = shortSideFit;
-						bestLongSideFit = longSideFit;
+						bestContactScore = score;
 					}
 				}
-
-				if (binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width)
-				{
-					int flippedLeftoverHoriz = abs(freeRectangles[i].width - height);
-					int flippedLeftoverVert = abs(freeRectangles[i].height - width);
-					int flippedShortSideFit = min(flippedLeftoverHoriz, flippedLeftoverVert);
-					int flippedLongSideFit = max(flippedLeftoverHoriz, flippedLeftoverVert);
-
-					if (flippedShortSideFit < bestShortSideFit || (flippedShortSideFit == bestShortSideFit && flippedLongSideFit < bestLongSideFit))
-					{
+				if(binAllowFlip && freeRectangles[i].width >= height && freeRectangles[i].height >= width) {
+					int score = ContactPointScoreNode(freeRectangles[i].x, freeRectangles[i].y, height, width);
+					if(score > bestContactScore) {
 						bestNode.x = freeRectangles[i].x;
 						bestNode.y = freeRectangles[i].y;
 						bestNode.width = height;
 						bestNode.height = width;
-						bestShortSideFit = flippedShortSideFit;
-						bestLongSideFit = flippedLongSideFit;
+						bestContactScore = score;
 					}
 				}
 			}
 			return bestNode;
 		}
 
-		void InsertNewFreeRectangle(const Rect &newFreeRect);
+		void InsertNewFreeRectangle(const Rect &newFreeRect) {
+			assert(newFreeRect.width > 0);
+			assert(newFreeRect.height > 0);
+
+			for(size_t i = 0; i < newFreeRectanglesLastSize;) {
+				// This new free rectangle is already accounted for?
+				if(IsContainedIn(newFreeRect, newFreeRectangles[i]))
+					return;
+
+				// Does this new free rectangle obsolete a previous new free rectangle?
+				if(IsContainedIn(newFreeRectangles[i], newFreeRect)) {
+					// Remove i'th new free rectangle, but do so by retaining the order
+					// of the older vs newest free rectangles that we may still be placing
+					// in calling function SplitFreeNode().
+					newFreeRectangles[i] = newFreeRectangles[--newFreeRectanglesLastSize];
+					newFreeRectangles[newFreeRectanglesLastSize] = newFreeRectangles.back();
+					newFreeRectangles.pop_back();
+				} else
+					++i;
+			}
+			newFreeRectangles.push_back(newFreeRect);
+		}
 
 		/// @return True if the free node was split.
-		bool SplitFreeNode(const Rect &freeNode, const Rect &usedNode);
+		bool SplitFreeNode(const Rect &freeNode, const Rect &usedNode) {
+			// Test with SAT if the rectangles even intersect.
+			if(usedNode.x >= freeNode.x + freeNode.width || usedNode.x + usedNode.width <= freeNode.x ||
+				usedNode.y >= freeNode.y + freeNode.height || usedNode.y + usedNode.height <= freeNode.y)
+				return false;
+
+			// We add up to four new free rectangles to the free rectangles list below. None of these
+			// four newly added free rectangles can overlap any other three, so keep a mark of them
+			// to avoid testing them against each other.
+			newFreeRectanglesLastSize = newFreeRectangles.size();
+
+			if(usedNode.x < freeNode.x + freeNode.width && usedNode.x + usedNode.width > freeNode.x) {
+				// New node at the top side of the used node.
+				if(usedNode.y > freeNode.y && usedNode.y < freeNode.y + freeNode.height) {
+					Rect newNode = freeNode;
+					newNode.height = usedNode.y - newNode.y;
+					InsertNewFreeRectangle(newNode);
+				}
+
+				// New node at the bottom side of the used node.
+				if(usedNode.y + usedNode.height < freeNode.y + freeNode.height) {
+					Rect newNode = freeNode;
+					newNode.y = usedNode.y + usedNode.height;
+					newNode.height = freeNode.y + freeNode.height - (usedNode.y + usedNode.height);
+					InsertNewFreeRectangle(newNode);
+				}
+			}
+
+			if(usedNode.y < freeNode.y + freeNode.height && usedNode.y + usedNode.height > freeNode.y) {
+				// New node at the left side of the used node.
+				if(usedNode.x > freeNode.x && usedNode.x < freeNode.x + freeNode.width) {
+					Rect newNode = freeNode;
+					newNode.width = usedNode.x - newNode.x;
+					InsertNewFreeRectangle(newNode);
+				}
+
+				// New node at the right side of the used node.
+				if(usedNode.x + usedNode.width < freeNode.x + freeNode.width) {
+					Rect newNode = freeNode;
+					newNode.x = usedNode.x + usedNode.width;
+					newNode.width = freeNode.x + freeNode.width - (usedNode.x + usedNode.width);
+					InsertNewFreeRectangle(newNode);
+				}
+			}
+
+			return true;
+		}
 
 		/// Goes through the free rectangle list and removes any redundant entries.
-		void PruneFreeList();
-	};
+		void PruneFreeList() {
+			// Test all newly introduced free rectangles against old free rectangles.
+			for(size_t i = 0; i < freeRectangles.size(); ++i)
+				for(size_t j = 0; j < newFreeRectangles.size();) {
+					if(IsContainedIn(newFreeRectangles[j], freeRectangles[i])) {
+						newFreeRectangles[j] = newFreeRectangles.back();
+						newFreeRectangles.pop_back();
+					} else {
+						// The old free rectangles can never be contained in any of the
+						// new free rectangles (the new free rectangles keep shrinking
+						// in size)
+						assert(!IsContainedIn(freeRectangles[i], newFreeRectangles[j]));
 
+						++j;
+					}
+				}
+
+			// Merge new and old free rectangles to the group of old free rectangles.
+			freeRectangles.insert(freeRectangles.end(), newFreeRectangles.begin(), newFreeRectangles.end());
+			newFreeRectangles.clear();
+
+			#ifdef _DEBUG
+			for(size_t i = 0; i < freeRectangles.size(); ++i)
+				for(size_t j = i + 1; j < freeRectangles.size(); ++j) {
+					assert(!IsContainedIn(freeRectangles[i], freeRectangles[j]));
+					assert(!IsContainedIn(freeRectangles[j], freeRectangles[i]));
+				}
+			#endif
+		}
+	};
+}
+
+int main(int argc, char *argv[]) {
+	//I want die
+	//same
 }
