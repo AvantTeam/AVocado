@@ -31,7 +31,8 @@ namespace av {
         static int warns;
 
         #ifdef _WIN32
-            static HANDLE win_console;
+        static HANDLE win_console;
+        static WORD win_def_color;
         #endif
 
         log() = delete;
@@ -53,41 +54,41 @@ namespace av {
             // this code is demonic in nature, very icky, no good.
             if constexpr(T_level == log_level::info) {
                 #ifdef _WIN32
-                    SetConsoleTextAttribute(win_console, 9); // blue text
+                SetConsoleTextAttribute(win_console, 9); // Blue text.
                 #else
-                    printf("\u001B[34m");
+                printf("\u001B[34m");
                 #endif
                 printf("[I] ");
             } else if constexpr(T_level == log_level::warn) {
                 warns++;
                 #ifdef _WIN32
-                    SetConsoleTextAttribute(win_console, 14); // yellow text
+                SetConsoleTextAttribute(win_console, 14); // Yellow text.
                 #else
-                    printf("\u001B[33m");
+                printf("\u001B[33m");
                 #endif
                 printf("[W] ");
             } else if constexpr(T_level == log_level::error) {
                 errors++;
                 #ifdef _WIN32
-                    SetConsoleTextAttribute(win_console, 12); // red text
+                SetConsoleTextAttribute(win_console, 12); // Red text.
                 #else
-                    printf("\u001B[31m");
+                printf("\u001B[31m");
                 #endif
                 printf("[E] ");
             } else if constexpr(T_level == log_level::debug) {
                 #ifdef _WIN32
-                    SetConsoleTextAttribute(win_console, 9); // blue text
+                SetConsoleTextAttribute(win_console, 8); // Gray text.
                 #else
-                    printf("\u001B[34m");
+                printf("\u001B[34m");
                 #endif
                 printf("[D] ");
             }
 
             // reset colors
             #ifdef _WIN32
-                SetConsoleTextAttribute(win_console, 15);
+            SetConsoleTextAttribute(win_console, win_def_color);
             #else
-                printf("\u001B[0m");
+            printf("\u001B[0m");
             #endif
 
             printf(str, std::forward<T_args>(args)...);

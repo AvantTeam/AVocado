@@ -6,6 +6,14 @@ namespace av {
     int log::warns = 0;
 
     #ifdef _WIN32
-    HANDLE log::win_console = GetStdHandle(STD_OUTPUT_HANDLE);
+    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    HANDLE log::win_console = console;
+    WORD log::win_def_color = [](HANDLE console) -> WORD {
+        CONSOLE_SCREEN_BUFFER_INFO info;
+        GetConsoleScreenBufferInfo(console, &info);
+        
+        return info.wAttributes;
+    }(console);
     #endif
 }
