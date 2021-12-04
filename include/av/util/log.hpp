@@ -31,10 +31,10 @@ namespace av {
         static int warns;
         /** @brief Log level prefixes and colors in the format of {ANSI, Windows, Prefix}*/
         static char constexpr prefixes[4][3] = {
-            {'34', '9', '[I] '}, 
-            {'33', '14', '[W] '}, 
-            {'31', '12', '[E] '}, 
-            {'34', '9', '[D] '}
+            {'34', (char) 9, '[I] '}, 
+            {'33', (char) 14, '[W] '}, 
+            {'31', (char) 12, '[E] '}, 
+            {'34', (char) 9, '[D] '}
         };
 
         // great
@@ -66,6 +66,7 @@ namespace av {
                 SetConsoleTextAttribute(win_console, win_def_color);
             #else
                 printf("\u001B[%cm%c\u001B[0m" prefixes[level][0], prefixes[level][2]);
+
             #endif
 
             printf(str, std::forward<T_args>(args)...);
