@@ -6,8 +6,11 @@
 using namespace av; // I don't care.
 
 int main(int argc, char *argv[]) {
+    log::msg<log_level::info>("Start test");
+
     log::set_level<log_level::error>();
     log::msg<log_level::debug>("Can't see me.");
+    log::msg<log_level::error>("Notice me!");
 
     log::set_level<log_level::debug>();
     log::msg<log_level::debug>("Size of input_manager: %d", sizeof(input_manager));
@@ -45,6 +48,8 @@ int main(int argc, char *argv[]) {
     
     bool success = app.loop();
     service::app::reset();
+
+    log::msg<log_level::info>("End test");
 
     return success;
 }
