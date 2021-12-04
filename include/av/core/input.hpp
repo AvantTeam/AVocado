@@ -119,28 +119,33 @@ namespace av {
 
             /**
              * @brief Convenience function to setup key bindings and dimension type.
-             * @tparam T_keys The keystroke bindings, length must be either 1, 2, or 4. For length 1 it'll set `type`
-             * to `dimension::single`, for length 2 it'll set `type` to `dimension::linear`, otherwise `dimension::planar`.
+             * @T_key0 First key. Implicitly sets `type` to `dimension::single`.
+             * @T_key1 Second key. If supplied, then will set `type` to `dimension::single`.
+             * @T_key2 Third key. If supplied, then T_key3 must be supplied as well, and will set `type` to `dimension::planar`.
+             * @T_key3 Fourth key. If supplied, then T_key2 must be supplied as well, and will set `type` to `dimension::planar`.
              */
             template<int T_key0, int T_key1 = 0, int T_key2 = 0, int T_key3 = 0>
             void set_keys() {
-                /*static constexpr int length = sizeof...(T_keys);
-                static_assert(length == 1 || length == 2 || length == 4, "T_keys length must be either 1, 2, or 4.");
-                
-                if constexpr(length == 1) {
+                static constexpr bool
+                    single = T_key0 && !T_key1 && !T_key2 && !T_key3,
+                    linear = !single && T_key0 && T_key1 && !T_key2 && !T_key3,
+                    planar = !single && !linear && T_key0 && T_key1 && T_key2 && T_key3;
+
+                static_assert(single || linear || planar, "You must supply either 1, 2 or 4 keys to the template arguments.");
+                if constexpr(single) {
                     type = dimension::single;
-                    //keys[0] = T_keys[0];
-                } else if constexpr(length == 2) {
+                    keys[0] = T_key0;
+                } else if constexpr(linear) {
                     type = dimension::linear;
-                    //keys[0] = T_keys[0];
-                    //keys[1] = T_keys[1];
+                    keys[0] = T_key0;
+                    keys[1] = T_key1;
                 } else {
                     type = dimension::planar;
-                    //keys[0] = T_keys[0];
-                    //keys[1] = T_keys[1];
-                    //keys[2] = T_keys[2];
-                    //keys[3] = T_keys[3];
-                }*/
+                    keys[0] = T_key0;
+                    keys[1] = T_key1;
+                    keys[2] = T_key2;
+                    keys[3] = T_key3;
+                }
             }
         } keyboard;
     };
