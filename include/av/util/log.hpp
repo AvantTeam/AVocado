@@ -21,6 +21,12 @@ namespace av {
         debug
     };
 
+    struct prefix {
+        const char* unix, *pref;
+        int windows;
+        constexpr prefix(const char* u, int w, const char* p) : unix(u), windows(w), pref(p) {}
+    };
+
     /** @brief Utility logger class. */
     class log {
         /** @brief Highest log level that will be shown. */
@@ -30,11 +36,11 @@ namespace av {
         /** @brief Total warn logs. */
         static int warns;
         /** @brief Log level prefixes and colors in the format of {ANSI, Windows, Prefix}*/
-        static char constexpr prefixes[4][3] = {
-            {'34', (char) 9, '[I] '}, 
-            {'33', (char) 14, '[W] '}, 
-            {'31', (char) 12, '[E] '}, 
-            {'34', (char) 9, '[D] '}
+        static prefix constexpr prefixes[4] = {
+            {"34", 9, "[I] "},
+            {"33", 14, "[W] "},
+            {"31", 12, "[E] "}, 
+            {"34", 9, "[D] "}
         };
 
         // great
@@ -61,11 +67,11 @@ namespace av {
             if(T_level > level) return;
 
             #ifdef _WIN32
-                SetConsoleTextAttribute(win_console, prefixes[level][1]);
-                printf(prefixes[level][2]);
+                SetConsoleTextAttribute(win_console, prefixes[(int)level].windows);
+                printf(prefixes[(int)level].pref);
                 SetConsoleTextAttribute(win_console, win_def_color);
             #else
-                printf("\u001B[%cm%c\u001B[0m" prefixes[level][0], prefixes[level][2]);
+                printf("\u001B[%cm%c\u001B[0m" prefixes[(int)level].unix, prefixes[(int)level].pref);
 
             #endif
 
