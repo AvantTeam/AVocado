@@ -45,7 +45,6 @@ int main(int argc, char *argv[]) {
     bool success = app.loop();
     service::app::reset();
 
-    log::msg<log_level::info>("End test");
-
+    log::msg<log_level::info>("End test.");
     return success;
 }

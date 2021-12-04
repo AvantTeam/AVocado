@@ -124,27 +124,23 @@ namespace av {
              */
             template<int T_key0, int T_key1 = 0, int T_key2 = 0, int T_key3 = 0>
             void set_keys() {
-                static constexpr int length = sizeof...(T_keys);
+                /*static constexpr int length = sizeof...(T_keys);
                 static_assert(length == 1 || length == 2 || length == 4, "T_keys length must be either 1, 2, or 4.");
                 
                 if constexpr(length == 1) {
                     type = dimension::single;
-                    keys[0] = T_keys[0];
+                    //keys[0] = T_keys[0];
                 } else if constexpr(length == 2) {
                     type = dimension::linear;
-                    keys[0] = T_keys[0];
-                    keys[1] = T_keys[1];
+                    //keys[0] = T_keys[0];
+                    //keys[1] = T_keys[1];
                 } else {
                     type = dimension::planar;
-                    keys[0] = T_keys[0];
-                    keys[1] = T_keys[1];
-                    keys[2] = T_keys[2];
-                    keys[3] = T_keys[3];
-                }
-            }
-
-            void a() {
-                
+                    //keys[0] = T_keys[0];
+                    //keys[1] = T_keys[1];
+                    //keys[2] = T_keys[2];
+                    //keys[3] = T_keys[3];
+                }*/
             }
         } keyboard;
     };

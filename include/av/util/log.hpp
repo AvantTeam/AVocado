@@ -111,10 +111,6 @@ namespace av {
             log::level = level;
         }
     };
-
-    #ifdef _WIN32
-        HANDLE log::win_console = GetStdHandle(STD_OUTPUT_HANDLE);
-    #endif
 }
 
 #endif // !AV_UTIL_LOG_HPP
