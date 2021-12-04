@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <utility>
 
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -30,6 +30,10 @@ namespace av {
         /** @brief Total warn logs. */
         static int warns;
 
+        #ifdef _WIN32
+            static HANDLE win_console;
+        #endif
+
         log() = delete;
         ~log() = delete;
 
@@ -45,17 +49,46 @@ namespace av {
         template<log_level T_level = log_level::info, typename... T_args>
         static inline void msg(const char *str, T_args &&... args) {
             if(T_level > level) return;
+
+            // this code is demonic in nature, very icky, no good.
             if constexpr(T_level == log_level::info) {
+                #ifdef _WIN32
+                    SetConsoleTextAttribute(win_console, 9); // blue text
+                #else
+                    printf("\u001B[34m");
+                #endif
                 printf("[I] ");
             } else if constexpr(T_level == log_level::warn) {
                 warns++;
+                #ifdef _WIN32
+                    SetConsoleTextAttribute(win_console, 14); // yellow text
+                #else
+                    printf("\u001B[33m");
+                #endif
                 printf("[W] ");
             } else if constexpr(T_level == log_level::error) {
                 errors++;
+                #ifdef _WIN32
+                    SetConsoleTextAttribute(win_console, 12); // red text
+                #else
+                    printf("\u001B[31m");
+                #endif
                 printf("[E] ");
             } else if constexpr(T_level == log_level::debug) {
+                #ifdef _WIN32
+                    SetConsoleTextAttribute(win_console, 9); // blue text
+                #else
+                    printf("\u001B[34m");
+                #endif
                 printf("[D] ");
             }
+
+            // reset colors
+            #ifdef _WIN32
+                SetConsoleTextAttribute(win_console, 15);
+            #else
+                printf("\u001B[0m");
+            #endif
 
             printf(str, std::forward<T_args>(args)...);
             printf("\n");
@@ -78,6 +111,10 @@ namespace av {
             log::level = level;
         }
     };
+
+    #ifdef _WIN32
+        HANDLE log::win_console = GetStdHandle(STD_OUTPUT_HANDLE);
+    #endif
 }
 
 #endif // !AV_CORE_UTIL_LOG_HPP
