@@ -55,7 +55,7 @@ target_link_libraries(avutil
 target_link_libraries(avcore
     PUBLIC
         avutil
-        SDL2::SDL2main SDL2::SDL2
+        SDL2::SDL2main SDL2::SDL2-static
 )
 
 add_executable(packer packer/packer.cpp)
