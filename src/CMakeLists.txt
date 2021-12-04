@@ -16,6 +16,7 @@ set(CORE_SOURCES
     glad.c
     core/app.cpp
     core/input.cpp
+    core/util/log.cpp
 )
 
 add_library(avcore ${CORE_HEADERS} ${CORE_SOURCES})

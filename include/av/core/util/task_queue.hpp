@@ -23,6 +23,7 @@ namespace av {
         public:
         /**
          * @brief Submits a function to the queue.
+         * 
          * @param function The callable object to be added to, either a method reference or a lambda expression.
          */
         inline void submit(const T_func &function) {
@@ -33,6 +34,7 @@ namespace av {
 
         /**
          * @brief Invokes all functions in the queue.
+         * 
          * @param args The function arguments.
          */
         void run(T_args &&... args) {
@@ -51,6 +53,7 @@ namespace av {
 
         /**
          * @brief Invokes all functions in the queue with a listener.
+         * 
          * @param listener The listening function, in a signature of `T(T_ret_type &)`.
          * @param args The function arguments.
          */

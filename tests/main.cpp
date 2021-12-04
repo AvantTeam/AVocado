@@ -6,9 +6,13 @@
 using namespace av; // I don't care.
 
 int main(int argc, char *argv[]) {
-    SDL_Log("Size of input_manager: %d", sizeof(input_manager));
-    SDL_Log("Size of input_value  : %d", sizeof(input_value));
-    SDL_Log("Size of key_bind     : %d", sizeof(key_bind));
+    log::set_level<log_level::error>();
+    log::msg<log_level::debug>("Can't see me.");
+
+    log::set_level<log_level::debug>();
+    log::msg<log_level::debug>("Size of input_manager: %d", sizeof(input_manager));
+    log::msg<log_level::debug>("Size of input_value  : %d", sizeof(input_value));
+    log::msg<log_level::debug>("Size of key_bind     : %d", sizeof(key_bind));
 
     class: public app_listener {
         public:

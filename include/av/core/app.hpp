@@ -4,6 +4,7 @@
 #include "glad/glad.h"
 #include "input.hpp"
 #include "service.hpp"
+#include "util/log.hpp"
 #include "util/task_queue.hpp"
 
 #include <SDL2/SDL.h>
@@ -29,7 +30,10 @@ namespace av {
     };
 
     /** @brief Defines an application listener. */
-    struct app_listener {
+    class app_listener {
+        friend class app;
+
+        protected:
         /** @brief Called in `app::init(const app_config &)`. */
         virtual void init(app &application) {}
 
@@ -84,6 +88,7 @@ namespace av {
         /**
          * @brief Removes an application listener from the list. When called inside `loop()`, it will be removed in the
          * next frame. Note that this does not destroy the listener itself, it is your responsibility to do such.
+         * 
          * @param listener The pointer to the application listener.
          */
         inline void remove_listener(app_listener *const &listener) {
@@ -94,14 +99,15 @@ namespace av {
 
         /**
          * @brief Initializes the application, creating an SDL window and an OpenGL context.
+         * 
          * @param config The application configuration.
-         *
          * @return `true` if succeeded and both the window and context are successfully created, `false` otherwise.
          */
         bool init(const app_config &config = {});
         /**
          * @brief Initializes the application loop. `init()` must be successfully invoked prior to this function. This
          * function won't return until `exitting` is `true`.
+         * 
          * @return `true` if the main loop ended purely due to the application reaching exit state, `false` if the loop
          *         encountered exception(s).
          */
@@ -133,6 +139,7 @@ namespace av {
 
         /**
          * @brief Invokes a function on all the application listeners.
+         * 
          * @param T_func The function, in a signature of `void(app_listener &, app &)`.
          * @return `true` if all the function is successfully invoked to all the listeners, `false` if one or more of
          * the listeners threw an exception.
@@ -141,7 +148,7 @@ namespace av {
             try {
                 for(app_listener *const &listener : listeners) acceptor(*listener, *this);
             } catch(std::exception &e) {
-                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, e.what());
+                log::msg<log_level::error>(e.what());
                 return false;
             }
 
@@ -150,6 +157,7 @@ namespace av {
 
         /**
          * @brief Submits a function that will run at the end of the frame in `loop()`.
+         * 
          * @param function The lambda `void` function accepting `app &` parameter.
          */
         inline void post(const std::function<void(app &)> &function) {

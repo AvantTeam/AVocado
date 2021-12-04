@@ -17,6 +17,7 @@ namespace av {
 
         /**
          * @brief Constructs an input value with the given data.
+         * 
          * @tparam T The data type.
          * @param value The const reference to the data.
          */
@@ -29,6 +30,7 @@ namespace av {
 
         /**
          * @brief Sets the data of this input value.
+         * 
          * @param value The const reference to the data.
          */
         template<typename T>
@@ -38,6 +40,7 @@ namespace av {
 
         /**
          * @brief Reads the data as the given type parameter.
+         * 
          * @tparam T The data type to be read as.
          * @return The casted data of this input value.
          */
@@ -154,6 +157,7 @@ namespace av {
 
         /**
          * @brief Reads user input events and populates the input states to be processed in `update()`.
+         * 
          * @param e The SDL event gained typically from `SDL_PollEvent(SDL_Event *)`.
          */
         void read(const SDL_Event &e);
@@ -162,6 +166,7 @@ namespace av {
 
         /**
          * @brief Retrieves a key bind from its registered name.
+         * 
          * @tparam T_type The `key_type` of the named key bind.
          * @param name The registered key bind's name.
          * @return The key bind. Will throw an exception if not found.
@@ -180,6 +185,7 @@ namespace av {
 
         /**
          * @brief Retrieves a key bind from its registered name.
+         * 
          * @tparam T_type The `key_type` of the named key bind.
          * @param name The registered key bind's name.
          * @return The (read-only) key bind. Will throw an exception if not found.
@@ -198,6 +204,7 @@ namespace av {
 
         /**
          * @brief Registers a key bind by it's name and type.
+         * 
          * @tparam T_type The `key_type` of the key bind.
          * @param name The key bind name.
          * @param bind The key bind. This will be copied, so it is safe to allocate it in stack and discard it after.
