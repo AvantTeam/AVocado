@@ -2,15 +2,21 @@
 
 include(CMakeFindDependencyMacro)
 
-if(TARGET AVocado::avcore)
+if(TARGET AVocado::avutil)
     if(NOT TARGET glm::glm)
         find_dependency(glm REQUIRED)
     endif()
 
+    if(NOT TARGET EnTT::EnTT)
+        find_dependency(EnTT REQUIRED)
+    endif()
+endif()
+
+if(TARGET AVocado::avcore)
     if(NOT TARGET SDL2::SDL2)
         find_dependency(SDL2 REQUIRED)
     endif()
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/AVocadoTargets.cmake")
-check_required_components(Avcore)
+check_required_components(avutil avcore)

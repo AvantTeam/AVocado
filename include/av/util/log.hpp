@@ -4,6 +4,10 @@
 #include <cstdio>
 #include <utility>
 
+#ifdef WINDOWS
+#include <windows.h>
+#endif
+
 namespace av {
     /** @brief Defines a log level; see `log`'s documentation for details. */
     enum class log_level {
@@ -25,8 +29,6 @@ namespace av {
         static int errors;
         /** @brief Total warn logs. */
         static int warns;
-        /** @brief Total debug logs. */
-        static int debugs;
 
         log() = delete;
         ~log() = delete;
@@ -52,7 +54,6 @@ namespace av {
                 errors++;
                 printf("[E] ");
             } else if constexpr(T_level == log_level::debug) {
-                debugs++;
                 printf("[D] ");
             }
 

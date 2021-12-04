@@ -5,8 +5,8 @@
 #include "input.hpp"
 
 #include <av/core/service.hpp>
-#include <av/core/util/log.hpp>
-#include <av/core/util/task_queue.hpp>
+#include <av/util/log.hpp>
+#include <av/util/task_queue.hpp>
 
 #include <SDL2/SDL.h>
 #include <algorithm>
@@ -45,7 +45,7 @@ namespace av {
     /**
      * @brief A non copy-constructible class defining an application. Should only be instantiated once. Holds an SDL
      * window, an OpenGL context, and dynamic listeners.
-     * 
+     *
      * Applications must be instantiated by setting up the instance in `av::service` simply by invoking `av::service::app::set()`,
      * as opposed to be manually instantiated. Call `av::service::app::reset()` after usage.
      */
@@ -89,7 +89,7 @@ namespace av {
         /**
          * @brief Removes an application listener from the list. When called inside `loop()`, it will be removed in the
          * next frame. Note that this does not destroy the listener itself, it is your responsibility to do such.
-         * 
+         *
          * @param listener The pointer to the application listener.
          */
         inline void remove_listener(app_listener *const &listener) {
@@ -100,7 +100,7 @@ namespace av {
 
         /**
          * @brief Initializes the application, creating an SDL window and an OpenGL context.
-         * 
+         *
          * @param config The application configuration.
          * @return `true` if succeeded and both the window and context are successfully created, `false` otherwise.
          */
@@ -108,7 +108,7 @@ namespace av {
         /**
          * @brief Initializes the application loop. `init()` must be successfully invoked prior to this function. This
          * function won't return until `exitting` is `true`.
-         * 
+         *
          * @return `true` if the main loop ended purely due to the application reaching exit state, `false` if the loop
          *         encountered exception(s).
          */
@@ -140,7 +140,7 @@ namespace av {
 
         /**
          * @brief Invokes a function on all the application listeners.
-         * 
+         *
          * @param T_func The function, in a signature of `void(app_listener &, app &)`.
          * @return `true` if all the function is successfully invoked to all the listeners, `false` if one or more of
          * the listeners threw an exception.
@@ -158,7 +158,7 @@ namespace av {
 
         /**
          * @brief Submits a function that will run at the end of the frame in `loop()`.
-         * 
+         *
          * @param function The lambda `void` function accepting `app &` parameter.
          */
         inline void post(const std::function<void(app &)> &function) {

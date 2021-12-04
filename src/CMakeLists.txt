@@ -1,33 +1,32 @@
 find_package(glm REQUIRED)
 find_package(EnTT REQUIRED)
+find_package(cxxopts REQUIRED)
 find_package(SDL2 REQUIRED)
 
-set(avbackend_HEADERS
+set(avcore_HEADERS
     ../include/glad/glad.h
     ../include/KHR/khrplatform.h
-    ../include/av/backend/app.hpp
-    ../include/av/backend/input.hpp
-)
-
-set(avbackend_SOURCES
-    backend/app.cpp
-    backend/input.cpp
-)
-
-set(avcore_HEADERS
+    ../include/av/core/app.hpp
+    ../include/av/core/input.hpp
     ../include/av/core/service.hpp
-    ../include/av/core/util/log.hpp
-    ../include/av/core/util/command_parser.hpp
-    ../include/av/core/util/task_queue.hpp
 )
 
 set(avcore_SOURCES
     glad.c
-    core/util/command_parser.cpp
-    core/util/log.cpp
+    core/app.cpp
+    core/input.cpp
 )
 
-foreach(SUBMODULE avcore avbackend)
+set(avutil_HEADERS
+    ../include/av/util/log.hpp
+    ../include/av/util/task_queue.hpp
+)
+
+set(avutil_SOURCES
+    util/log.cpp
+)
+
+foreach(SUBMODULE avcore avutil)
     add_library(${SUBMODULE} ${${SUBMODULE}_HEADERS} ${${SUBMODULE}_SOURCES})
     add_library(AVocado::${SUBMODULE} ALIAS ${SUBMODULE})
 
@@ -48,14 +47,14 @@ foreach(SUBMODULE avcore avbackend)
     endforeach()
 endforeach()
 
-target_link_libraries(avcore
+target_link_libraries(avutil
     PUBLIC
-        glm::glm EnTT::EnTT
+        glm::glm EnTT::EnTT cxxopts::cxxopts
 )
 
-target_link_libraries(avbackend
+target_link_libraries(avcore
     PUBLIC
-        avcore
+        avutil
         SDL2::SDL2main SDL2::SDL2
 )
 

@@ -12,7 +12,7 @@ include(CMakePackageConfigHelpers)
 
 add_subdirectory(src)
 
-foreach(SUBMODULE avcore avbackend)
+foreach(SUBMODULE avcore avutil)
     set(PROJECT ${SUBMODULE})
     set(VERSION ${PROJECT_VERSION})
 
@@ -32,7 +32,7 @@ foreach(SUBMODULE avcore avbackend)
     )
 endforeach()
 
-install(TARGETS avcore
+install(TARGETS avcore avutil
     EXPORT AVocadoTargets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
