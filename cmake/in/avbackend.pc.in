@@ -4,9 +4,9 @@ libdir=@LIB_DIR@
 includedir=@INCLUDE_DIR@
 
 Name: @PROJECT@
-Description: The core module of the AVocado framework. Contains general and global utility headers.
+Description: The backend module of the AVocado framework. Contains headers like application, input managing system, and such.
 Version: @VERSION@
 
-Requires:
+Requires: avcore == @VERSION@
 Libs: -L${libdir} -l@PROJECT@
 Cflags: -I${includedir}

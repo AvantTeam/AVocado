@@ -3,9 +3,10 @@
 
 #include "glad/glad.h"
 #include "input.hpp"
-#include "service.hpp"
-#include "util/log.hpp"
-#include "util/task_queue.hpp"
+
+#include <av/core/service.hpp>
+#include <av/core/util/log.hpp>
+#include <av/core/util/task_queue.hpp>
 
 #include <SDL2/SDL.h>
 #include <algorithm>

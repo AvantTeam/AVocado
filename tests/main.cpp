@@ -1,4 +1,4 @@
-#include <av/core/app.hpp>
+#include <av/backend/app.hpp>
 #include <stdexcept>
 
 #include <glm/vec2.hpp>

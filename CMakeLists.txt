@@ -12,7 +12,7 @@ include(CMakePackageConfigHelpers)
 
 add_subdirectory(src)
 
-foreach(SUBMODULE avcore)
+foreach(SUBMODULE avcore avbackend)
     set(PROJECT ${SUBMODULE})
     set(VERSION ${PROJECT_VERSION})
 
