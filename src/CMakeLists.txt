@@ -8,12 +8,14 @@ set(avcore_HEADERS
     ../include/av/core/app.hpp
     ../include/av/core/input.hpp
     ../include/av/core/service.hpp
+    ../include/av/core/graphics/mesh.hpp
 )
 
 set(avcore_SOURCES
     glad.c
     core/app.cpp
     core/input.cpp
+    core/graphics/mesh.cpp
 )
 
 set(avutil_HEADERS
