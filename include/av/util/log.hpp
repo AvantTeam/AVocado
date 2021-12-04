@@ -1,10 +1,10 @@
-#ifndef AV_CORE_UTIL_LOG_HPP
-#define AV_CORE_UTIL_LOG_HPP
+#ifndef AV_UTIL_LOG_HPP
+#define AV_UTIL_LOG_HPP
 
 #include <cstdio>
 #include <utility>
 
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -80,4 +80,4 @@ namespace av {
     };
 }
 
-#endif // !AV_CORE_UTIL_LOG_HPP
+#endif // !AV_UTIL_LOG_HPP

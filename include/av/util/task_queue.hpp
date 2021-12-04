@@ -1,5 +1,5 @@
-#ifndef AV_CORE_UTIL_TASKQUEUE_HPP
-#define AV_CORE_UTIL_TASKQUEUE_HPP
+#ifndef AV_UTIL_TASKQUEUE_HPP
+#define AV_UTIL_TASKQUEUE_HPP
 
 #include <functional>
 #include <mutex>
@@ -74,4 +74,4 @@ namespace av {
     };
 }
 
-#endif // !AV_CORE_UTIL_TASKQUEUE_HPP
+#endif // !AV_UTIL_TASKQUEUE_HPP

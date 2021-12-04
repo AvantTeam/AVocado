@@ -1,6 +1,5 @@
 find_package(glm REQUIRED)
 find_package(EnTT REQUIRED)
-find_package(cxxopts REQUIRED)
 find_package(SDL2 REQUIRED)
 
 set(avcore_HEADERS
@@ -49,7 +48,7 @@ endforeach()
 
 target_link_libraries(avutil
     PUBLIC
-        glm::glm EnTT::EnTT cxxopts::cxxopts
+        glm::glm EnTT::EnTT
 )
 
 target_link_libraries(avcore

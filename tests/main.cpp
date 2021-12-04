@@ -27,11 +27,7 @@ int main(int argc, char *argv[]) {
     app.add_listener(&listener);
 
     key_bind key;
-    key.keyboard.type = key_bind::keyboard_bind::dimension::planar;
-    key.keyboard.keys[0] = SDLK_w;
-    key.keyboard.keys[1] = SDLK_s;
-    key.keyboard.keys[2] = SDLK_a;
-    key.keyboard.keys[3] = SDLK_d;
+    key.keyboard.set_keys<SDLK_w, SDLK_s, SDLK_a, SDLK_d>();
     key.callback = [](const input_value &value) {
         const glm::vec2 &axis = value.read<glm::vec2>();
         // Do something with axis...
