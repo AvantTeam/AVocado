@@ -21,6 +21,12 @@ namespace av {
         debug
     };
 
+    struct prefix {
+        const char* unix, *pref;
+        int windows;
+        constexpr prefix(const char* u, int w, const char* p) : unix(u), windows(w), pref(p) {}
+    };
+
     /** @brief Utility logger class. */
     class log {
         /** @brief Highest log level that will be shown. */
@@ -29,7 +35,16 @@ namespace av {
         static int errors;
         /** @brief Total warn logs. */
         static int warns;
+        /** @brief Log level prefixes and colors in the format of {ANSI, Windows, Prefix}*/
+        static prefix constexpr prefixes[4] = {
+            {"34", 9, "[I] "},
+            {"33", 14, "[W] "},
+            {"31", 12, "[E] "}, 
+            {"34", 9, "[D] "}
+        };
 
+        // great
+        // actually we need another value
         #ifdef _WIN32
         static HANDLE win_console;
         static WORD win_def_color;
@@ -37,7 +52,7 @@ namespace av {
 
         log() = delete;
         ~log() = delete;
-
+        
         public:
         /**
          * @brief Utility function to output a formatted message to the console, prefixed by the log level's initials.
@@ -51,44 +66,13 @@ namespace av {
         static inline void msg(const char *str, T_args &&... args) {
             if(T_level > level) return;
 
-            // this code is demonic in nature, very icky, no good.
-            if constexpr(T_level == log_level::info) {
-                #ifdef _WIN32
-                SetConsoleTextAttribute(win_console, 9); // Blue text.
-                #else
-                printf("\u001B[34m");
-                #endif
-                printf("[I] ");
-            } else if constexpr(T_level == log_level::warn) {
-                warns++;
-                #ifdef _WIN32
-                SetConsoleTextAttribute(win_console, 14); // Yellow text.
-                #else
-                printf("\u001B[33m");
-                #endif
-                printf("[W] ");
-            } else if constexpr(T_level == log_level::error) {
-                errors++;
-                #ifdef _WIN32
-                SetConsoleTextAttribute(win_console, 12); // Red text.
-                #else
-                printf("\u001B[31m");
-                #endif
-                printf("[E] ");
-            } else if constexpr(T_level == log_level::debug) {
-                #ifdef _WIN32
-                SetConsoleTextAttribute(win_console, 8); // Gray text.
-                #else
-                printf("\u001B[34m");
-                #endif
-                printf("[D] ");
-            }
-
-            // reset colors
             #ifdef _WIN32
-            SetConsoleTextAttribute(win_console, win_def_color);
+                SetConsoleTextAttribute(win_console, prefixes[(int)level].windows);
+                printf(prefixes[(int)level].pref);
+                SetConsoleTextAttribute(win_console, win_def_color);
             #else
-            printf("\u001B[0m");
+                printf("\u001B[%cm%c\u001B[0m" prefixes[(int)level].unix, prefixes[(int)level].pref);
+
             #endif
 
             printf(str, std::forward<T_args>(args)...);
