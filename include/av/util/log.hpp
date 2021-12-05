@@ -22,9 +22,9 @@ namespace av {
     };
 
     struct prefix {
-        const char* unix, *pref;
+        const char* ansi, *pref;
         int windows;
-        constexpr prefix(const char* u, int w, const char* p) : unix(u), windows(w), pref(p) {}
+        constexpr prefix(const char* a, int w, const char* p) : ansi(a), windows(w), pref(p) {}
     };
 
     /** @brief Utility logger class. */
@@ -69,7 +69,7 @@ namespace av {
                 printf(prefixes[(int)level].pref);
                 SetConsoleTextAttribute(win_console, win_def_color);
             #else
-                printf("\u001B[%cm%c\u001B[0m" prefixes[(int)level].unix, prefixes[(int)level].pref);
+                printf("\u001B[%cm%c\u001B[0m" prefixes[(int)level].ansi, prefixes[(int)level].pref);
 
             #endif
 
