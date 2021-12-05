@@ -21,7 +21,8 @@ namespace av {
 
         public:
         shader(const shader &) = delete;
-        shader(const char *vertex_source, const char *fragment_source, std::initializer_list<const char *> frag_datas = {"out_color"});
+        shader() = default;
+        shader(const char *vertex_source, const char *fragment_source, std::initializer_list<std::string> frag_datas = {"out_color"});
         ~shader();
 
         inline void use() const {

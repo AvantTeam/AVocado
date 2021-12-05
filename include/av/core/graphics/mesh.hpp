@@ -12,8 +12,10 @@ namespace av {
     struct vert_attribute {
         /** @brief 2 `float` components; X and Y. */
         static const vert_attribute pos_2D;
-        /** @brief 4 `unsigned char` components; alpha, blue, green, and red. Can be packed into a single float value. */
+        /** @brief 4 `float` components; alpha, blue, green, and red. */
         static const vert_attribute color;
+        /** @brief 4 `unsigned char` components; alpha, blue, green, and red. Can be packed into a single float value. */
+        static const vert_attribute color_packed;
 
         /** @brief How many components this attribute has. Affects `size`. */
         int components;
@@ -38,9 +40,9 @@ namespace av {
         vert_attribute(int components, int type, const std::string &name, bool normalized = false):
             components(components),
             type(type),
+            size(count_size()),
             normalized(normalized),
-            name(std::move(name)),
-            size(count_size()) {}
+            name(name) {}
         /**
          * @brief Constructs a new vertex attribute with given constructor arguments. It is recommended not to use this
          * constructor directly, but to use `create()` instead.
@@ -48,9 +50,9 @@ namespace av {
         vert_attribute(int components, int type, int size, const std::string &name, bool normalized = false):
             components(components),
             type(type),
+            size(size),
             normalized(normalized),
-            name(std::move(name)),
-            size(size) {}
+            name(name) {}
 
         /**
          * Counts what should be used in `size`.
@@ -62,17 +64,17 @@ namespace av {
          * @return A new vertex attribute with given template arguments. The `size` of this attribute will be automatically
          * accounted for at compile-time.
          */
-        template<int T_components, int T_type>
-        static vert_attribute create(const std::string &name, bool normalized = false) {
+        template<int T_components, int T_type, bool T_normalized = false>
+        static vert_attribute create(const std::string &name) {
             static constexpr int type_size = T_components * (
                 T_type == GL_BYTE || T_type == GL_UNSIGNED_BYTE ? sizeof(char) :
                 T_type == GL_SHORT || T_type == GL_UNSIGNED_SHORT ? sizeof(short) :
                 T_type == GL_INT || T_type == GL_UNSIGNED_INT ? sizeof(int) :
                 T_type == GL_FLOAT ? sizeof(float) : -1
-            );
+                );
 
             static_assert(type_size != -1, "Invalid vertex attribute type.");
-            return vert_attribute(T_components, T_type, type_size, name, normalized);
+            return vert_attribute(T_components, T_type, type_size, name, T_normalized);
         }
     };
 
@@ -88,6 +90,7 @@ namespace av {
 
         public:
         mesh(const mesh &) = delete;
+        mesh() = default;
         mesh(size_t max_vertices, size_t max_indices, std::initializer_list<vert_attribute> attributes);
         ~mesh();
 
@@ -106,7 +109,7 @@ namespace av {
             static_assert(T_usage == GL_STATIC_DRAW || T_usage == GL_DYNAMIC_DRAW || T_usage == GL_STREAM_DRAW, "Invalid vertex data usage.");
 
             glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-            glBufferData(GL_ARRAY_BUFFER, length * sizeof(float), vertices, T_usage);
+            glBufferData(GL_ARRAY_BUFFER, length, vertices + offset, T_usage);
         }
 
         template<int T_usage = GL_STATIC_DRAW>
@@ -114,24 +117,12 @@ namespace av {
             static_assert(T_usage == GL_STATIC_DRAW || T_usage == GL_DYNAMIC_DRAW || T_usage == GL_STREAM_DRAW, "Invalid index data usage.");
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, length * sizeof(unsigned short), indices, T_usage);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, length, indices + offset, T_usage);
         }
 
-        template<bool T_auto_bind, int T_primitive_type>
-        inline void render(const shader &program, size_t offset, size_t count) {
-            if constexpr(T_auto_bind) bind(program);
-
-            if(has_indices) {
-                glDrawElements(T_primitive_type, count, GL_UNSIGNED_SHORT, (void)offset);
-            } else {
-                glDrawArrays(T_primitive_type, offset, count);
-            }
-
-            if constexpr(T_auto_bind) unbind(program);
-        }
-
-        void bind(const shader &program);
-        void unbind(const shader &program);
+        void render(const shader &program, int primitive_type, size_t offset, size_t count, bool auto_bind = true) const;
+        void bind(const shader &program) const;
+        void unbind(const shader &program) const;
     };
 }
 

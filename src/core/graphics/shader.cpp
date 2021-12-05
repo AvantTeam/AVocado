@@ -2,7 +2,7 @@
 #include <av/util/log.hpp>
 
 namespace av {
-    shader::shader(const char *vertex_source, const char *fragment_source, std::initializer_list<const char *> frag_datas):
+    shader::shader(const char *vertex_source, const char *fragment_source, std::initializer_list<std::string> frag_datas):
         vertex_shader(create_shader(GL_VERTEX_SHADER, vertex_source)),
         fragment_shader(create_shader(GL_FRAGMENT_SHADER, fragment_source)),
 
@@ -23,7 +23,7 @@ namespace av {
         glAttachShader(program, fragment_shader);
         
         int index = 0;
-        for(const char *const &data : frag_datas) glBindFragDataLocation(program, index++, data);
+        for(const std::string &data : frag_datas) glBindFragDataLocation(program, index++, data.c_str());
 
         glLinkProgram(program);
 

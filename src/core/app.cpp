@@ -1,23 +1,16 @@
 #include <av/core/app.hpp>
 
 namespace av {
-    app::~app() {
-        if(context) SDL_GL_DeleteContext(context);
-        if(window) SDL_DestroyWindow(window);
-        SDL_Quit();
+    app::app(const app_config &config):
+        initialized(true),
+        listeners_initialized(false),
 
-        log::msg("Application disposed.");
-    }
-
-    bool app::init(const app_config &config) {
-        if(window || context) {
-            log::msg<log_level::error>("Cannot re-initialize an application.");
-            return false;
-        }
-
+        window([&]() -> SDL_Window * {
         if(SDL_Init(SDL_INIT_VIDEO) < 0) {
             log::msg<log_level::error>("Couldn't initialize SDL: %s", SDL_GetError());
-            return false;
+
+            initialized = false;
+            return nullptr;
         }
 
         SDL_version ver;
@@ -32,32 +25,59 @@ namespace av {
         if(config.shown) flags |= SDL_WINDOW_SHOWN;
         if(config.resizable) flags |= SDL_WINDOW_RESIZABLE;
 
-        window = SDL_CreateWindow(config.title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, config.width, config.height, flags);
+        SDL_Window *window = SDL_CreateWindow(config.title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, config.width, config.height, flags);
         if(!window) {
             log::msg<log_level::error>("Couldn't create SDL window: %s", SDL_GetError());
-            return false;
+
+            initialized = false;
+            return nullptr;
         }
 
-        context = SDL_GL_CreateContext(window);
+        return window;
+    }()),
+        context([&]() -> SDL_GLContext {
+        SDL_GLContext context = SDL_GL_CreateContext(window);
         if(!context) {
             log::msg<log_level::error>("Couldn't create OpenGL context: %s", SDL_GetError());
-            return false;
+
+            initialized = false;
+            return nullptr;
         }
 
-        if(!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
-            log::msg<log_level::error>("Couldn't load OpenGL extension loader.");
-            return false;
-        }
-
+        if(!gladLoadGLLoader(SDL_GL_GetProcAddress)) throw std::runtime_error("Couldn't load OpenGL extension loader.");
         log::msg("Initialized OpenGL v%d.%d.", GLVersion.major, GLVersion.minor);
 
         if(config.vsync) SDL_GL_SetSwapInterval(1);
+        return context;
+    }()),
+        exitting(false) {}
+
+    app::~app() {
+        if(context) SDL_GL_DeleteContext(context);
+        if(window) SDL_DestroyWindow(window);
+        SDL_Quit();
+
+        log::msg("Application disposed.");
+    }
+
+    bool app::init_listeners() {
+        if(listeners_initialized) {
+            log::msg<log_level::error>("Can't initialize application listeners twice.");
+            return false;
+        }
+
+        if(!window || !context) {
+            log::msg<log_level::error>("Application didn't instantiate correctly. Check `has_initialized()`.");
+            return false;
+        }
+
+        listeners_initialized = true;
         return accept([](auto &listener, auto &app) -> void { listener.init(app); });
     }
 
     bool app::loop() {
-        if(!window || !context) {
-            log::msg<log_level::error>("`init()` must be successfully invoked before calling `loop()`.");
+        if(!listeners_initialized) {
+            log::msg<log_level::error>("`init_listeners()` must be successfully invoked before calling `loop()`.");
             return false;
         }
 

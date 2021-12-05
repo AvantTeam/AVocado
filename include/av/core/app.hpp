@@ -49,6 +49,11 @@ namespace av {
      * as opposed to be manually instantiated. Call `av::service::app::reset()` after usage.
      */
     class app {
+        /** @brief Whether the application successfully initialized. Implicitly set in the constructor. */
+        bool initialized;
+        /** @brief Whether the application has initialized its listeners. */
+        bool listeners_initialized;
+
         /** @brief The SDL window this application holds. Initialized in `init(const app_config &)`. */
         SDL_Window *window;
         /** @brief The OpenGL context this application holds. Initialized in `init(const app_config &)`. */
@@ -66,18 +71,25 @@ namespace av {
         public:
         app(const app &) = delete; // Delete the copy-constructor.
         /**
-         * @brief Instantiates an empty application. Calls to `init(const app_config &)` and `loop()` respectively are
+         * @brief Instantiates and initializes an application. Calls to `init_listeners()` and `loop()` respectively are
          * required to run the application. Add application listeners by invoking `add_listener(app_listener *const &)`.
+         * 
+         * @param config The application configuration.
          */
-        app(): window(nullptr), context(nullptr), exitting(false) {}
+        app(const app_config &config = {});
         /**
          * @brief Destroys the application. The OpenGL context the SDL window are destroyed here. The requirement for
          * the application listeners to not be destructed are released.
          */
         ~app();
 
+        /** @return Whether the application was successfully instantiated. */
+        inline bool has_initialized() {
+            return initialized;
+        }
+
         /**
-         * @brief Adds an arbitrary application listener. Typically invoked before `init()`. Use with caution.
+         * @brief Adds an arbitrary application listener. Typically invoked before `init_listeners()`. Use with caution.
          * @param listener The pointer to the application listener. This is all yours and won't be destructed in any of
          *                 the application class' codes, though you must make sure it is not destructed until `loop()`
          *                 returns.
@@ -100,13 +112,12 @@ namespace av {
         /**
          * @brief Initializes the application, creating an SDL window and an OpenGL context.
          *
-         * @param config The application configuration.
-         * @return `true` if succeeded and both the window and context are successfully created, `false` otherwise.
+         * @return `true` if succeeded initializing all listeners, `false` otherwise.
          */
-        bool init(const app_config &config = {});
+        bool init_listeners();
         /**
-         * @brief Initializes the application loop. `init()` must be successfully invoked prior to this function. This
-         * function won't return until `exitting` is `true`.
+         * @brief Initializes the application loop. `init_listeners()` must be successfully invoked prior to this function.
+         * This function won't return until `exitting` is `true`.
          *
          * @return `true` if the main loop ended purely due to the application reaching exit state, `false` if the loop
          *         encountered exception(s).
