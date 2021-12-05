@@ -82,6 +82,7 @@ namespace av {
         size_t vertex_size;
         std::vector<vert_attribute> attributes;
 
+        bool has_indices;
         unsigned int vertex_buffer;
         unsigned int index_buffer;
 
@@ -115,6 +116,22 @@ namespace av {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, length * sizeof(unsigned short), indices, T_usage);
         }
+
+        template<bool T_auto_bind, int T_primitive_type>
+        inline void render(const shader &program, size_t offset, size_t count) {
+            if constexpr(T_auto_bind) bind(program);
+
+            if(has_indices) {
+                glDrawElements(T_primitive_type, count, GL_UNSIGNED_SHORT, (void)offset);
+            } else {
+                glDrawArrays(T_primitive_type, offset, count);
+            }
+
+            if constexpr(T_auto_bind) unbind(program);
+        }
+
+        void bind(const shader &program);
+        void unbind(const shader &program);
     };
 }
 
