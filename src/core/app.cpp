@@ -19,7 +19,7 @@ namespace av {
             log::msg<log_level::error>("Couldn't initialize SDL: %s", SDL_GetError());
             return false;
         }
-        
+
         SDL_version ver;
         SDL_GetVersion(&ver);
         log::msg("Initialized SDL v%d.%d.%d.", ver.major, ver.minor, ver.patch);
@@ -50,7 +50,7 @@ namespace av {
         }
 
         log::msg("Initialized OpenGL v%d.%d.", GLVersion.major, GLVersion.minor);
-        
+
         if(config.vsync) SDL_GL_SetSwapInterval(1);
         return accept([](auto &listener, auto &app) -> void { listener.init(app); });
     }
@@ -60,7 +60,7 @@ namespace av {
             log::msg<log_level::error>("`init()` must be successfully invoked before calling `loop()`.");
             return false;
         }
-        
+
         run_posts();
         while(!exitting) {
             SDL_Event e;

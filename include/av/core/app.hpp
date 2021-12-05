@@ -4,7 +4,6 @@
 #include "glad/glad.h"
 #include "input.hpp"
 
-#include <av/core/service.hpp>
 #include <av/util/log.hpp>
 #include <av/util/task_queue.hpp>
 

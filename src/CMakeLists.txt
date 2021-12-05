@@ -7,7 +7,6 @@ set(avcore_HEADERS
     ../include/KHR/khrplatform.h
     ../include/av/core/app.hpp
     ../include/av/core/input.hpp
-    ../include/av/core/service.hpp
     ../include/av/core/graphics/mesh.hpp
 )
 

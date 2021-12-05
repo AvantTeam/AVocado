@@ -50,7 +50,7 @@ namespace av {
 
         log() = delete;
         ~log() = delete;
-        
+
         public:
         /**
          * @brief Utility function to output a formatted message to the console, prefixed by the log level's initials.
@@ -65,12 +65,11 @@ namespace av {
             if(T_level > level) return;
 
             #ifdef _WIN32
-                SetConsoleTextAttribute(win_console, prefixes[(int)level].windows);
-                printf(prefixes[(int)level].pref);
-                SetConsoleTextAttribute(win_console, win_def_color);
+            SetConsoleTextAttribute(win_console, prefixes[(int)level].windows);
+            printf(prefixes[(int)level].pref);
+            SetConsoleTextAttribute(win_console, win_def_color);
             #else
-                printf("\u001B[%cm%c\u001B[0m" prefixes[(int)level].ansi, prefixes[(int)level].pref);
-
+            printf("\u001B[%cm%c\u001B[0m", prefixes[(int)level].ansi, prefixes[(int)level].pref);
             #endif
 
             printf(str, std::forward<T_args>(args)...);

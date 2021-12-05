@@ -24,9 +24,7 @@ int main(int argc, char *argv[]) {
         }
     } listener;
 
-    service::app::set();
-
-    app &app = service::app::ref();
+    app app;
     app.add_listener(&listener);
 
     key_bind key;
@@ -37,13 +35,9 @@ int main(int argc, char *argv[]) {
     };
 
     app.get_input().bind<key_type::keyboard>("WASD", key);
-    if(!app.init()) {
-        service::app::reset();
-        return 1;
-    }
-    
+    if(!app.init()) return 1;
+
     bool success = app.loop();
-    service::app::reset();
 
     log::msg<log_level::info>("End test.");
     return success;
