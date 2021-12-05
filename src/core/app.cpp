@@ -1,4 +1,4 @@
-#include "av/core/app.hpp"
+#include <av/core/app.hpp>
 
 namespace av {
     app::~app() {
@@ -52,7 +52,7 @@ namespace av {
         log::msg("Initialized OpenGL v%d.%d.", GLVersion.major, GLVersion.minor);
         
         if(config.vsync) SDL_GL_SetSwapInterval(1);
-        return accept([](auto &listener, auto &app) { listener.init(app); });
+        return accept([](auto &listener, auto &app) -> void { listener.init(app); });
     }
 
     bool app::loop() {
@@ -79,7 +79,7 @@ namespace av {
                 return false;
             }
 
-            if(!accept([](auto &listener, auto &app) { listener.update(app); })) return false;
+            if(!accept([](auto &listener, auto &app) -> void { listener.update(app); })) return false;
 
             run_posts();
             SDL_GL_SwapWindow(window);

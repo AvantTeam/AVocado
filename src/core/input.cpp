@@ -1,5 +1,4 @@
-#include "av/core/input.hpp"
-
+#include <av/core/input.hpp>
 #include <glm/vec2.hpp>
 
 namespace av {
