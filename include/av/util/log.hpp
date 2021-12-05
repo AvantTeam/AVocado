@@ -22,9 +22,10 @@ namespace av {
     };
 
     struct prefix {
-        const char* ansi, *pref;
+        const char *ansi, *pref;
         int windows;
-        constexpr prefix(const char* a, int w, const char* p) : ansi(a), windows(w), pref(p) {}
+
+        constexpr prefix(const char* a, int w, const char* p): ansi(a), pref(p), windows(w) {}
     };
 
     /** @brief Utility logger class. */
@@ -35,8 +36,8 @@ namespace av {
         static int errors;
         /** @brief Total warn logs. */
         static int warns;
-        /** @brief Log level prefixes and colors in the format of {ANSI, Windows, Prefix}*/
-        static prefix constexpr prefixes[4] = {
+        /** @brief Log level prefixes and colors in the format of `{ANSI, Windows, Prefix}`. */
+        static constexpr prefix prefixes[4] = {
             {"34", 9, "[I] "},
             {"33", 14, "[W] "},
             {"31", 12, "[E] "}, 
@@ -65,8 +66,8 @@ namespace av {
             if(T_level > level) return;
 
             #ifdef _WIN32
-            SetConsoleTextAttribute(win_console, prefixes[(int)level].windows);
-            printf(prefixes[(int)level].pref);
+            SetConsoleTextAttribute(win_console, prefixes[(int)T_level].windows);
+            printf(prefixes[(int)T_level].pref);
             SetConsoleTextAttribute(win_console, win_def_color);
             #else
             printf("\u001B[%cm%c\u001B[0m", prefixes[(int)level].ansi, prefixes[(int)level].pref);

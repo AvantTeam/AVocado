@@ -65,7 +65,6 @@ namespace av {
                 }
             }
 
-            for(const auto &button : mouse_up) mouse_down.erase(button);
             mouse_up.clear();
         }
 
@@ -88,16 +87,23 @@ namespace av {
                 switch(keyboard.type) {
                     case dimension::single: {
                         const auto &key = keyboard.keys[0];
-                        if(key_down.find(key) != key_down.end()) {
+                        if(keyboard.is_continuous()) {
                             value.set(key);
-                            value.performed = true;
+                            value.performed = key_down.find(key) != key_down.end();
 
                             bind.callback(value);
-                        } else if(key_up.find(key) != key_up.end()) {
-                            value.set(key);
-                            value.performed = false;
+                        } else {
+                            if(key_down.find(key) != key_down.end()) {
+                                value.set(key);
+                                value.performed = true;
 
-                            bind.callback(value);
+                                bind.callback(value);
+                            } else if(key_up.find(key) != key_up.end()) {
+                                value.set(key);
+                                value.performed = false;
+
+                                bind.callback(value);
+                            }
                         }
                     } break;
 
@@ -130,13 +136,13 @@ namespace av {
                             right = key_down.find(keyboard.keys[3]) != key_down.end();
 
                         if(up || down || left || right) {
-                            glm::vec2 axis;
-                            axis.y =
-                                up && down ? 0.0f :
-                                up ? 1.0f : down ? -1.0f : 0.0f;
-                            axis.x =
+                            glm::vec2 axis(
                                 left && right ? 0.0f :
-                                left ? -1.0f : right ? 1.0f : 0.0f;
+                                left ? -1.0f : right ? 1.0f : 0.0f,
+
+                                up && down ? 0.0f :
+                                up ? 1.0f : down ? -1.0f : 0.0f
+                            );
 
                             value.set(axis);
                             value.performed = true;
@@ -152,7 +158,6 @@ namespace av {
                 }
             }
 
-            for(const auto &button : key_up) key_down.erase(button);
             key_up.clear();
         } else {
             using dimension = key_bind::keyboard_bind::dimension;
@@ -163,15 +168,20 @@ namespace av {
             for(const auto &[name, bind] : map) {
                 const auto &keyboard = bind.keyboard;
                 switch(keyboard.type) {
+                    case dimension::single: if(keyboard.is_continuous()) {
+                        value.set(keyboard.keys[0]);
+                        bind.callback(value);
+                    } break;
+
                     case dimension::linear: {
                         value.set(0.0f);
                         bind.callback(value);
                     } break;
 
-                    case dimension::planar: {
+                    default: {
                         value.set(glm::vec2(0.0f, 0.0f));
                         bind.callback(value);
-                    } break;
+                    };
                 }
             }
         }

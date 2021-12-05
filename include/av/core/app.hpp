@@ -35,10 +35,10 @@ namespace av {
 
         protected:
         /** @brief Called in `app::init(const app_config &)`. */
-        virtual void init(app &application) {}
+        virtual void init([[maybe_unused]] app &application) {}
 
         /** @brief Called in `app::loop()`. */
-        virtual void update(app &application) {}
+        virtual void update([[maybe_unused]] app &application) {}
     };
 
     /**
@@ -124,8 +124,8 @@ namespace av {
         inline const SDL_Window *get_window() const {
             return window;
         }
-        /** @return The (read-only) OpenGL context this application holds. */
-        inline const SDL_GLContext get_context() const {
+        /** @return The OpenGL context this application holds. */
+        inline SDL_GLContext get_context() const {
             return context;
         }
         /** @return The application's input manager. */

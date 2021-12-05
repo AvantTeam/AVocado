@@ -8,6 +8,7 @@ set(avcore_HEADERS
     ../include/av/core/app.hpp
     ../include/av/core/input.hpp
     ../include/av/core/graphics/mesh.hpp
+    ../include/av/core/graphics/shader.hpp
 )
 
 set(avcore_SOURCES
@@ -15,6 +16,7 @@ set(avcore_SOURCES
     core/app.cpp
     core/input.cpp
     core/graphics/mesh.cpp
+    core/graphics/shader.cpp
 )
 
 set(avutil_HEADERS

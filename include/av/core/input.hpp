@@ -12,10 +12,10 @@
 namespace av {
     /** @brief An input value passed to input callback functions, containing arbitrary value and a "performed" state. */
     struct input_value {
-        /** @brief "Performed" as in mouse click or mouse release, key down or key up, etc. */
-        bool performed;
         /** @brief Raw pointer to the actual data. Use `read<T>()` to obtain the const reference to the data. */
         const void *data;
+        /** @brief "Performed" as in mouse click or mouse release, key down or key up, etc. */
+        bool performed;
 
         /**
          * @brief Constructs an input value with the given data.
@@ -91,13 +91,13 @@ namespace av {
             /** @brief Defines "key dimensions", that is to determine the input values' data based on key presses. */
             enum class dimension {
                 /**
-                 * @brief Holds to one key only. In case of a button press, `input_value::data` will be set to `keys[0]`, 
+                 * @brief Holds to one key only. In case of a button press, `input_value::data` will be set to `keys[0]`,
                  * while `input_value::performed` will be set to whether the key was pressed or released.
                  */
                 single,
                 /**
                  * @brief Holds to 2 keys; the "additive" key and the "subtractive" key. `keys[0]` acts as the "additive"
-                 * key while `keys[1]` acts as the "subtractive" key. When the "additive" or "subtractive" are pressed, 
+                 * key while `keys[1]` acts as the "subtractive" key. When the "additive" or "subtractive" are pressed,
                  * they will yield `1.0f` and `-1.0f` respectively to `input_value::data`, while `input_value::performed`
                  * is set to whether the 2 keys are pressed at all.
                  */
@@ -114,6 +114,10 @@ namespace av {
              * @brief Container for keyboard keys. In case for `dimension::single`, only `keys[0]` is used. For
              * `dimension::linear`, `keys[0]` and `keys[1]` are used for "additive" and "subtractive" keys respectively.
              * For `dimension::planar`, all 4 keys are used as up, down, left, and right keys respectively.
+             * 
+             * Exclusively for `dimension::single`, `keys[1]` can also be used to determine whether this key bind is
+             * continuous or not. That is, whether to inform update every frame if the selected key is pressed or update
+             * just when the key has just been pressed or released.
              */
             unsigned short keys[4];
 
@@ -146,6 +150,15 @@ namespace av {
                     keys[2] = T_key2;
                     keys[3] = T_key3;
                 }
+            }
+
+            inline void set_continuous(bool continuous) {
+                if(type != dimension::single) throw std::runtime_error("Continuous keyboard bind is only valid on single binds.");
+                keys[1] = continuous;
+            }
+
+            inline bool is_continuous() const {
+                return type == dimension::single && keys[1];
             }
         } keyboard;
     };

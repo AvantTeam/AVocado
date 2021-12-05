@@ -5,8 +5,8 @@
 
 using namespace av; // I don't care.
 
-int main(int argc, char *argv[]) {
-    log::msg<log_level::info>("Start test");
+int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) {
+    log::msg<log_level::info>("Start test.");
 
     log::set_level<log_level::error>();
     log::msg<log_level::debug>("Can't see me.");
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     key_bind key;
     key.keyboard.set_keys<SDLK_w, SDLK_s, SDLK_a, SDLK_d>();
     key.callback = [](const input_value &value) {
-        const glm::vec2 &axis = value.read<glm::vec2>();
+        [[maybe_unused]] const glm::vec2 &axis = value.read<glm::vec2>();
         // Do something with axis...
     };
 
