@@ -69,7 +69,7 @@ namespace av {
                 printf(prefixes[(int)level].pref);
                 SetConsoleTextAttribute(win_console, win_def_color);
             #else
-                printf("\u001B[%cm%c\u001B[0m" prefixes[(int)level].ansi, prefixes[(int)level].pref);
+                printf("\u001B[%cm%c\u001B[0m", prefixes[(int)level].ansi, prefixes[(int)level].pref);
 
             #endif
 
