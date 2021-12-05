@@ -22,7 +22,7 @@ namespace av {
         glAttachShader(program, vertex_shader);
         glAttachShader(program, fragment_shader);
         
-        size_t index = 0;
+        int index = 0;
         for(const char *const &data : frag_datas) glBindFragDataLocation(program, index++, data);
 
         glLinkProgram(program);

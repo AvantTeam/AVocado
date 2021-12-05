@@ -99,6 +99,22 @@ namespace av {
         inline size_t get_vertex_size() const {
             return vertex_size;
         }
+
+        template<int T_usage = GL_STATIC_DRAW>
+        inline void set_vertices(float *vertices, size_t offset, size_t length) {
+            static_assert(T_usage == GL_STATIC_DRAW || T_usage == GL_DYNAMIC_DRAW || T_usage == GL_STREAM_DRAW, "Invalid vertex data usage.");
+
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+            glBufferData(GL_ARRAY_BUFFER, length * sizeof(float), vertices, T_usage);
+        }
+
+        template<int T_usage = GL_STATIC_DRAW>
+        inline void set_indices(unsigned short *indices, size_t offset, size_t length) {
+            static_assert(T_usage == GL_STATIC_DRAW || T_usage == GL_DYNAMIC_DRAW || T_usage == GL_STREAM_DRAW, "Invalid index data usage.");
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, length * sizeof(unsigned short), indices, T_usage);
+        }
     };
 }
 
