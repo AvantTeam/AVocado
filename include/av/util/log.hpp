@@ -43,8 +43,6 @@ namespace av {
             {"34", 9, "[D] "}
         };
 
-        // great
-        // actually we need another value
         #ifdef _WIN32
         static HANDLE win_console;
         static WORD win_def_color;

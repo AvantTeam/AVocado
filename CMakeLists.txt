@@ -12,6 +12,8 @@ include(CMakePackageConfigHelpers)
 
 add_subdirectory(src)
 
+add_compile_options(-Wall -Wextra)
+
 foreach(SUBMODULE avcore avutil)
     set(PROJECT ${SUBMODULE})
     set(VERSION ${PROJECT_VERSION})
