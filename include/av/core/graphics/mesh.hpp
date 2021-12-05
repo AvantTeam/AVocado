@@ -122,7 +122,7 @@ namespace av {
             if constexpr(T_auto_bind) bind(program);
 
             if(has_indices) {
-                glDrawElements(T_primitive_type, count, GL_UNSIGNED_SHORT, (void)offset);
+                glDrawElements(T_primitive_type, count, GL_UNSIGNED_SHORT, (void*)offset);
             } else {
                 glDrawArrays(T_primitive_type, offset, count);
             }
