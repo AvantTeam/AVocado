@@ -1,4 +1,5 @@
 #include <av/core/app.hpp>
+#include <av/util/time.hpp>
 
 namespace av {
     app::app(const app_config &config):
@@ -104,6 +105,8 @@ namespace av {
             run_posts();
             SDL_GL_SwapWindow(window);
         }
+
+        time::update();
 
         return true;
     }
