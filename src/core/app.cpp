@@ -100,13 +100,13 @@ namespace av {
                 return false;
             }
 
+            time::update();
+
             if(!accept([](auto &listener, auto &app) -> void { listener.update(app); })) return false;
 
             run_posts();
             SDL_GL_SwapWindow(window);
         }
-
-        time::update();
 
         return true;
     }

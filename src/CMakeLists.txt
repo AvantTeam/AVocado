@@ -23,6 +23,7 @@ set(avutil_HEADERS
     ../include/av/util/expr_traits.hpp
     ../include/av/util/log.hpp
     ../include/av/util/task_queue.hpp
+    ../include/av/util/time.hpp
 )
 
 set(avutil_SOURCES
