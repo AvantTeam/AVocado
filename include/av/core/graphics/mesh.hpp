@@ -70,8 +70,7 @@ namespace av {
                 T_type == GL_BYTE || T_type == GL_UNSIGNED_BYTE ? sizeof(char) :
                 T_type == GL_SHORT || T_type == GL_UNSIGNED_SHORT ? sizeof(short) :
                 T_type == GL_INT || T_type == GL_UNSIGNED_INT ? sizeof(int) :
-                T_type == GL_FLOAT ? sizeof(float) : -1
-                );
+                T_type == GL_FLOAT ? sizeof(float) : -1);
 
             static_assert(type_size != -1, "Invalid vertex attribute type.");
             return vert_attribute(T_components, T_type, type_size, name, T_normalized);
@@ -79,29 +78,29 @@ namespace av {
     };
 
     class mesh {
-        size_t max_vertices;
-        size_t max_indices;
         size_t vertex_size;
         std::vector<vert_attribute> attributes;
 
+        size_t max_vertices;
+        size_t max_indices;
         bool has_indices;
+
         unsigned int vertex_buffer;
         unsigned int index_buffer;
 
         public:
         mesh(const mesh &) = delete;
-        mesh() = default;
-        mesh(size_t max_vertices, size_t max_indices, std::initializer_list<vert_attribute> attributes);
+        mesh(std::initializer_list<vert_attribute> attributes);
         ~mesh();
 
+        inline size_t get_vertex_size() const {
+            return vertex_size;
+        }
         inline size_t get_max_vertices() const {
             return max_vertices;
         }
         inline size_t get_max_indices() const {
             return max_indices;
-        }
-        inline size_t get_vertex_size() const {
-            return vertex_size;
         }
 
         template<int T_usage = GL_STATIC_DRAW>
@@ -110,6 +109,8 @@ namespace av {
 
             glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
             glBufferData(GL_ARRAY_BUFFER, length, vertices + offset, T_usage);
+
+            max_vertices = length / sizeof(float);
         }
 
         template<int T_usage = GL_STATIC_DRAW>
@@ -118,6 +119,9 @@ namespace av {
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, length, indices + offset, T_usage);
+
+            max_indices = length / sizeof(unsigned short);
+            has_indices = max_indices > 0;
         }
 
         void render(const shader &program, int primitive_type, size_t offset, size_t count, bool auto_bind = true) const;

@@ -1,5 +1,6 @@
 #include <av/core/app.hpp>
 #include <av/core/graphics/mesh.hpp>
+#include <av/util/graphics/color.hpp>
 #include <glm/vec2.hpp>
 
 #include <stdexcept>
@@ -16,6 +17,22 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) {
     log::msg<log_level::debug>("Size of input_value  : %d", sizeof(input_value));
     log::msg<log_level::debug>("Size of key_bind     : %d", sizeof(key_bind));
 
+    log::msg<log_level::warn>("%d, %s, %d, %s, %s",
+        vert_attribute::pos_2D.components,
+        vert_attribute::pos_2D.type == GL_FLOAT ? "true" : "false",
+        vert_attribute::pos_2D.size,
+        vert_attribute::pos_2D.normalized ? "true" : "false",
+        vert_attribute::pos_2D.name.c_str()
+    );
+
+    log::msg<log_level::warn>("%d, %s, %d, %s, %s",
+        vert_attribute::color_packed.components,
+        vert_attribute::color_packed.type == GL_UNSIGNED_BYTE ? "true" : "false",
+        vert_attribute::color_packed.size,
+        vert_attribute::color_packed.normalized ? "true" : "false",
+        vert_attribute::color_packed.name.c_str()
+    );
+
     app process;
     if(!process.has_initialized()) return 1;
 
@@ -25,30 +42,33 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) {
 
         public:
         listener():
-            model(8, 6, {vert_attribute::pos_2D}),
+            model({vert_attribute::pos_2D, vert_attribute::color_packed}),
             model_shader(R"(
 #version 150 core
 in vec2 a_pos;
-out vec2 v_col;
+in vec4 a_col;
+
+out vec4 v_col;
 
 void main() {
-    gl_Position = vec4(a_pos.x, a_pos.y, 0.0, 1.0);
-    v_col = (a_pos + vec2(1.0, 1.0)) / 2.0;
+    gl_Position = vec4(a_pos, 0.0, 1.0);
+    v_col = a_col;
 })", R"(
 #version 150 core
 out vec4 out_color;
-in vec2 v_col;
+in vec4 v_col;
 
 void main() {
-    out_color = vec4(v_col.x, 0.0, v_col.y, 1.0);
+    out_color = v_col;
 })") {}
 
+        protected:
         void init(app &) override {
             float vertices[] = {
-                -1.0f, -1.0f,
-                 1.0f, -1.0f,
-                 1.0f,  1.0f,
-                -1.0f,  1.0f
+                -1.0f, -1.0f, 0.0f,
+                1.0f, -1.0f, 0.0f,
+                1.0f, 1.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f
             };
 
             unsigned short indices[] = {0, 1, 2, 2, 3, 0};
@@ -57,11 +77,16 @@ void main() {
             model.set_indices(indices, 0, sizeof(indices));
 
             log::msg("Start test.");
+            log::msg<log_level::warn>("Vertex size : %d", model.get_vertex_size());
+            log::msg<log_level::warn>("Max vertices: %d", model.get_max_vertices());
+            log::msg<log_level::warn>("Max indices : %d", model.get_max_indices());
         }
 
-        void update(app &) override {
+        void update(app &process) override {
             model_shader.use();
             model.render(model_shader, GL_TRIANGLES, 0, model.get_max_indices());
+
+            SDL_SetWindowTitle(process.get_window(), std::string("Delta time: ").append(std::to_string(process.get_time().delta())).c_str());
         }
 
         void dispose(app &) override {

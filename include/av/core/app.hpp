@@ -24,7 +24,7 @@ namespace av {
         /** @brief Window dimension. */
         int width = 800, height = 600;
         /** @brief Whether to turn on VSync at startup or not. */
-        bool vsync = true;
+        bool vsync;
         /** @brief Window flags. */
         bool shown = true, fullscreen, resizable;
     };
@@ -124,8 +124,8 @@ namespace av {
             exitting = true;
         }
 
-        /** @return The (read-only) SDL window this application holds. */
-        inline const SDL_Window *get_window() const {
+        /** @return The SDL window this application holds. */
+        inline SDL_Window *get_window() const {
             return window;
         }
         /** @return The OpenGL context this application holds. */

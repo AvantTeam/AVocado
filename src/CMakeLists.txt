@@ -24,6 +24,7 @@ set(avutil_HEADERS
     ../include/av/util/log.hpp
     ../include/av/util/task_queue.hpp
     ../include/av/util/time.hpp
+    ../include/av/util/graphics/color.hpp
 )
 
 set(avutil_SOURCES
