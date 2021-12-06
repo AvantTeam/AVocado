@@ -9,6 +9,9 @@ find_package(AVocado REQUIRED)
 
 if(MINGW)
     target_link_libraries(Tests PRIVATE mingw32)
-    target_link_options(Tests PRIVATE -mconsole)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_link_options(Tests PRIVATE -mconsole)
+    endif()
 endif()
+
 target_link_libraries(Tests PRIVATE AVocado::avcore)

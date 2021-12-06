@@ -1,11 +1,11 @@
 #ifndef AV_CORE_APP_HPP
 #define AV_CORE_APP_HPP
 
-#include "glad/glad.h"
-#include "input.hpp"
-
+#include <glad/glad.h>
+#include <av/core/input.hpp>
 #include <av/util/log.hpp>
 #include <av/util/task_queue.hpp>
+#include <av/util/time.hpp>
 
 #include <SDL2/SDL.h>
 #include <algorithm>
@@ -34,25 +34,23 @@ namespace av {
         friend class app;
 
         protected:
-        /** @brief Called in `app::init(const app_config &)`. */
+        /** @brief Called in the beginning of `app::loop()`. */
         virtual void init([[maybe_unused]] app &application) {}
 
-        /** @brief Called in `app::loop()`. */
+        /** @brief Called every frame in `app::loop()`. */
         virtual void update([[maybe_unused]] app &application) {}
+
+        /** @brief Called in the end of `app::loop()`. */
+        virtual void dispose([[maybe_unused]] app &application) {}
     };
 
     /**
      * @brief A non copy-constructible class defining an application. Should only be instantiated once. Holds an SDL
      * window, an OpenGL context, and dynamic listeners.
-     *
-     * Applications must be instantiated by setting up the instance in `av::service` simply by invoking `av::service::app::set()`,
-     * as opposed to be manually instantiated. Call `av::service::app::reset()` after usage.
      */
     class app {
         /** @brief Whether the application successfully initialized. Implicitly set in the constructor. */
         bool initialized;
-        /** @brief Whether the application has initialized its listeners. */
-        bool listeners_initialized;
 
         /** @brief The SDL window this application holds. Initialized in `init(const app_config &)`. */
         SDL_Window *window;
@@ -67,12 +65,14 @@ namespace av {
 
         /** @brief The SDL input event manager of the application. */
         input_manager input;
+        /** @brief Global time manager of the application. */
+        time_manager time;
 
         public:
         app(const app &) = delete; // Delete the copy-constructor.
         /**
-         * @brief Instantiates and initializes an application. Calls to `init_listeners()` and `loop()` respectively are
-         * required to run the application. Add application listeners by invoking `add_listener(app_listener *const &)`.
+         * @brief Instantiates and initializes an application. Add application listeners by invoking
+         * `add_listener(app_listener *const &)`. Enter the main loop afterwards by calling `loop()`.
          * 
          * @param config The application configuration.
          */
@@ -84,12 +84,12 @@ namespace av {
         ~app();
 
         /** @return Whether the application was successfully instantiated. */
-        inline bool has_initialized() {
+        inline bool has_initialized() const {
             return initialized;
         }
 
         /**
-         * @brief Adds an arbitrary application listener. Typically invoked before `init_listeners()`. Use with caution.
+         * @brief Adds an arbitrary application listener. Typically invoked before `loop()`. Use with caution.
          * @param listener The pointer to the application listener. This is all yours and won't be destructed in any of
          *                 the application class' codes, though you must make sure it is not destructed until `loop()`
          *                 returns.
@@ -110,14 +110,7 @@ namespace av {
         }
 
         /**
-         * @brief Initializes the application, creating an SDL window and an OpenGL context.
-         *
-         * @return `true` if succeeded initializing all listeners, `false` otherwise.
-         */
-        bool init_listeners();
-        /**
-         * @brief Initializes the application loop. `init_listeners()` must be successfully invoked prior to this function.
-         * This function won't return until `exitting` is `true`.
+         * @brief Initializes the application loop. This function won't return until `exitting` is `true`.
          *
          * @return `true` if the main loop ended purely due to the application reaching exit state, `false` if the loop
          *         encountered exception(s).
@@ -146,6 +139,14 @@ namespace av {
         /** @return The (read-only) application's input manager. */
         inline const input_manager &get_input() const {
             return input;
+        }
+        /** @return The application's time manager. */
+        inline time_manager &get_time() {
+            return time;
+        }
+        /** @return The (read-only) application's time manager. */
+        inline const time_manager &get_time() const {
+            return time;
         }
 
         /**

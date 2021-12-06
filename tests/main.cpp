@@ -7,8 +7,6 @@
 using namespace av; // I don't care.
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) {
-    log::msg<log_level::info>("Start test.");
-
     log::set_level<log_level::error>();
     log::msg<log_level::debug>("Can't see me.");
     log::msg<log_level::error>("Notice me!");
@@ -57,11 +55,17 @@ void main() {
 
             model.set_vertices(vertices, 0, sizeof(vertices));
             model.set_indices(indices, 0, sizeof(indices));
+
+            log::msg("Start test.");
         }
 
         void update(app &) override {
             model_shader.use();
             model.render(model_shader, GL_TRIANGLES, 0, model.get_max_indices());
+        }
+
+        void dispose(app &) override {
+            log::msg("End test.");
         }
     } listener;
 
@@ -75,10 +79,5 @@ void main() {
     };
 
     process.get_input().bind<key_type::keyboard>("WASD", key);
-    if(!process.init_listeners()) return 1;
-
-    bool success = process.loop();
-
-    log::msg<log_level::info>("End test.");
-    return success;
+    return process.loop();
 }

@@ -2,22 +2,37 @@
 #define AV_UTIL_TIME_HPP
 
 #include <chrono>
+#include <initializer_list>
+#include <vector>
 
 namespace av {
-    class time {
-        static float total_time, delta_time;
+    class time_manager {
+        using clock = std::chrono::high_resolution_clock;
 
-        private:
-        static std::chrono::high_resolution_clock::time_point new_time;
+        float delta;
+        clock::time_point last_time;
+
+        std::vector<float> times;
 
         public:
-        static void update(){
-            std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
+        time_manager(std::initializer_list<float> init = {0.0f}):
+            delta(0.0f),
+            last_time(clock::now()),
+            times(init) {}
 
-            delta_time = (now - new_time).count();
-            total_time += delta_time;
+        ~time_manager() = default;
 
-            new_time = now;
+        inline void update(std::initializer_list<int> indices = {0}) {
+            const clock::time_point &now = clock::now();
+            delta = (now - last_time).count() / 1000000000.0f;
+
+            for(int index : indices) times[index] += delta;
+
+            last_time = std::move(now);
+        }
+
+        inline float get(int index = 0) const {
+            return times[index];
         }
     };
 }

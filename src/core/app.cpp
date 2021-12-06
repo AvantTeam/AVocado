@@ -1,10 +1,8 @@
 #include <av/core/app.hpp>
-#include <av/util/time.hpp>
 
 namespace av {
     app::app(const app_config &config):
         initialized(true),
-        listeners_initialized(false),
 
         window([&]() -> SDL_Window * {
         if(SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -51,7 +49,8 @@ namespace av {
         if(config.vsync) SDL_GL_SetSwapInterval(1);
         return context;
     }()),
-        exitting(false) {}
+        exitting(false),
+        time({0.0f, 0.0f}) {}
 
     app::~app() {
         if(context) SDL_GL_DeleteContext(context);
@@ -61,26 +60,14 @@ namespace av {
         log::msg("Application disposed.");
     }
 
-    bool app::init_listeners() {
-        if(listeners_initialized) {
-            log::msg<log_level::error>("Can't initialize application listeners twice.");
-            return false;
-        }
-
-        if(!window || !context) {
-            log::msg<log_level::error>("Application didn't instantiate correctly. Check `has_initialized()`.");
-            return false;
-        }
-
-        listeners_initialized = true;
-        return accept([](auto &listener, auto &app) -> void { listener.init(app); });
-    }
-
     bool app::loop() {
-        if(!listeners_initialized) {
-            log::msg<log_level::error>("`init_listeners()` must be successfully invoked before calling `loop()`.");
+        if(!window || !context) {
+            log::msg<log_level::error>("`Application didn't instantiate correctly. Check `has_initialized()`.");
             return false;
         }
+
+        run_posts();
+        if(!accept([](app_listener &listener, app &app) -> void { listener.init(app); })) return false;
 
         run_posts();
         while(!exitting) {
@@ -93,6 +80,7 @@ namespace av {
                 }
             }
 
+            time.update({0, 1});
             try {
                 input.update();
             } catch(std::exception &e) {
@@ -100,14 +88,12 @@ namespace av {
                 return false;
             }
 
-            time::update();
-
-            if(!accept([](auto &listener, auto &app) -> void { listener.update(app); })) return false;
+            if(!accept([](app_listener &listener, app &app) -> void { listener.update(app); })) return false;
 
             run_posts();
             SDL_GL_SwapWindow(window);
         }
 
-        return true;
+        return accept([](app_listener &listener, app &app) -> void { listener.dispose(app); });
     }
 }
