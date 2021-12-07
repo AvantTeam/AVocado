@@ -90,8 +90,8 @@ namespace av {
          * @tparam T_value   The value type of the map.
          * @param  map       The map that is used to pair up field names with their locations.
          */
-        template<bool T_uniform, typename T_map, typename T_key = typename T_map::key_type, typename T_value = typename T_map::mapped_type>
-        void query_fields(T_map &map) const {
+        template<bool T_uniform, template<typename, typename, typename...> typename T_map, typename T_key, typename T_value, typename... T_args>
+        void query_fields(T_map<T_key, T_value, T_args...> &map) const {
             static constexpr int length_type = T_uniform ? GL_ACTIVE_UNIFORM_MAX_LENGTH : GL_ACTIVE_ATTRIBUTE_MAX_LENGTH;
             static constexpr int fields_type = T_uniform ? GL_ACTIVE_UNIFORMS : GL_ACTIVE_ATTRIBUTES;
 
