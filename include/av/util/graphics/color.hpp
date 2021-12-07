@@ -14,10 +14,10 @@ namespace av {
 
         inline int int_bits() const {
             return
-                ((int)(a * 255.0f) << 24) |
-                ((int)(b * 255.0f) << 16) |
-                ((int)(g * 255.0f) << 8) |
-                (int)(r * 255.0f);
+                (static_cast<int>(a * 255.0f) << 24) |
+                (static_cast<int>(b * 255.0f) << 16) |
+                (static_cast<int>(g * 255.0f) << 8) |
+                static_cast<int>(r * 255.0f);
         }
 
         inline float float_bits() const {

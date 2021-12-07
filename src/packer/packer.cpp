@@ -158,7 +158,7 @@ namespace av {
                 used_area += r.width * r.height;
             }
 
-            return (double)used_area / ((uint64_t)bin_width * bin_height);
+            return static_cast<double>(used_area) / (static_cast<uint64_t>(bin_width) * bin_height);
         }
 
         private:

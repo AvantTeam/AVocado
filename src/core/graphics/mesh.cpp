@@ -55,7 +55,7 @@ namespace av {
         if(auto_bind) bind(program);
 
         if(has_elements) {
-            glDrawElements(primitive_type, count, GL_UNSIGNED_SHORT, (void *)offset);
+            glDrawElements(primitive_type, count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(offset));
         } else {
             glDrawArrays(primitive_type, offset, count);
         }
@@ -71,7 +71,7 @@ namespace av {
             unsigned int loc = program.attribute_loc(attr.name);
 
             glEnableVertexAttribArray(loc);
-            glVertexAttribPointer(loc, attr.components, attr.type, attr.normalized, vertex_size, (void *)off);
+            glVertexAttribPointer(loc, attr.components, attr.type, attr.normalized, vertex_size, reinterpret_cast<void*>(off));
 
             off += attr.size;
         }

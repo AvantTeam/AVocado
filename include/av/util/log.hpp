@@ -67,11 +67,11 @@ namespace av {
             if(T_level > level) return;
 
             #ifdef _WIN32
-            SetConsoleTextAttribute(win_console, prefixes[(int)T_level].windows);
-            printf(prefixes[(int)T_level].pref);
+            SetConsoleTextAttribute(win_console, prefixes[static_cast<int>(T_level)].windows);
+            printf(prefixes[static_cast<int>(T_level)].pref);
             SetConsoleTextAttribute(win_console, win_def_color);
             #else
-            printf("\u001B[%sm%s\u001B[0m", prefixes[(int)T_level].ansi, prefixes[(int)T_level].pref);
+            printf("\u001B[%sm%s\u001B[0m", prefixes[static_cast<int>(T_level)].ansi, prefixes[static_cast<int>(T_level)].pref);
             #endif
 
             printf(str, std::forward<T_args>(args)...);
