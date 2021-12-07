@@ -110,7 +110,7 @@ namespace av {
             glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
             glBufferData(GL_ARRAY_BUFFER, length, vertices + offset, T_usage);
 
-            max_vertices = length / sizeof(float);
+            max_vertices = length / vertex_size;
         }
 
         template<int T_usage = GL_STATIC_DRAW>
