@@ -2,6 +2,7 @@
 #define AV_CORE_GRAPHICS_SHADER_HPP
 
 #include <glad/glad.h>
+#include <av/util/log.hpp>
 
 #include <initializer_list>
 #include <stdexcept>
@@ -67,7 +68,11 @@ namespace av {
                 }
 
                 name[length] = '\0';
-                map.emplace(static_cast<const char *>(name), i);
+                if constexpr(T_uniform) { // Apparently I can't just use `i` for this...
+                    map.emplace(static_cast<const char *>(name), glGetUniformLocation(program, name));
+                } else {
+                    map.emplace(static_cast<const char *>(name), glGetAttribLocation(program, name));
+                }
             }
         }
 

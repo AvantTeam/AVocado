@@ -65,10 +65,10 @@ void main() {
         protected:
         void init(app &) override {
             float vertices[] = {
-                -1.0f, -1.0f, 0.0f,
-                1.0f, -1.0f, 0.0f,
-                1.0f, 1.0f, 0.0f,
-                -1.0f, 1.0f, 0.0f
+                -1.0f, -1.0f, color(1.0f, 0.0f, 0.0f).float_bits(),
+                1.0f, -1.0f, color(0.0f, 1.0f, 0.0f).float_bits(),
+                1.0f, 1.0f, color(0.0f, 0.0f, 1.0f).float_bits(),
+                -1.0f, 1.0f, color(1.0f, 1.0f, 1.0f).float_bits()
             };
 
             unsigned short indices[] = {0, 1, 2, 2, 3, 0};

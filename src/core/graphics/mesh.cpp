@@ -4,7 +4,7 @@
 
 namespace av {
     const vert_attribute vert_attribute::pos_2D = vert_attribute::create<2, GL_FLOAT>("a_pos");
-    const vert_attribute vert_attribute::color = vert_attribute::create<4, GL_FLOAT, true>("a_col");
+    const vert_attribute vert_attribute::color = vert_attribute::create<4, GL_FLOAT>("a_col");
     const vert_attribute vert_attribute::color_packed = vert_attribute::create<4, GL_UNSIGNED_BYTE, true>("a_col");
 
     int vert_attribute::count_size() const {
@@ -73,11 +73,9 @@ namespace av {
             glEnableVertexAttribArray(loc);
             glVertexAttribPointer(loc, attr.components, attr.type, attr.normalized, vertex_size, (void *)off);
 
-            log::msg("%s: %d, %d, %d, %s, %d, %d", attr.name.c_str(), loc, attr.components, attr.type, attr.normalized ? "true" : "false", vertex_size, off);
             off += attr.size;
         }
         
-        log::msg("");
         if(has_indices) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
     }
 
