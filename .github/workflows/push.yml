@@ -18,9 +18,8 @@ jobs:
         sudo mkdir build
         cd build
         
-        cmake ..
-        ../configure
-        cmake --build . --install .
+        sudo ../configure
+        sudo cmake --build . --install .
         
         cd ../../
         
