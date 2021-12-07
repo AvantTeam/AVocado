@@ -12,7 +12,7 @@ jobs:
     - name: Build
       run: |
         sudo apt-get update
-        sudo apt-get install cmake libsdl2-dev pkg-config
+        sudo apt-get install cmake libsdl2-dev libglm-dev pkg-config
         
         sudo pkg-config --libs sdl2
         
