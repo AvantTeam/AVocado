@@ -19,7 +19,7 @@ jobs:
         cd build
         
         sudo ../configure
-        sudo cmake --build . --install .
+        sudo cmake --build . --target install
         
         cd ../../
         
