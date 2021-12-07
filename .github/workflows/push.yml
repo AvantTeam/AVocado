@@ -11,19 +11,19 @@ jobs:
     - name: Build
       run: |
         sudo apt-get update
-        apt install g++ cmake libsdl2-dev libglm-dev
+        sudo apt install g++ cmake libsdl2-dev libglm-dev
         
-        git clone https://github.com/skypjack/entt.git
+        sudo git clone https://github.com/skypjack/entt.git
         cd entt
         mkdir out
         cd out
         
-        cmake ..
-        cmake --install .
+        sudo cmake ..
+        sudo cmake --install .
         
         cd ../../
         mkdir out
         cd out
         
-        cmake ..
-        cmake --build . --target install
+        sudo cmake ..
+        sudo cmake --build . --target install
