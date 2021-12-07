@@ -11,10 +11,10 @@ jobs:
     - name: Build
       run: |
         sudo apt-get update
-        sudo apt-get install g++ cmake libsdl2-dev
+        sudo apt-get install g++ cmake gdebi-core
         
         curl -L "http://mirrors.kernel.org/ubuntu/pool/universe/libs/libsdl2/libsdl2-dev_2.0.14+dfsg2-3_amd64.deb" -o sdl2.deb
-        sudo dpkg -i sdl2.deb
+        sudo gdebi sdl2.deb
         sudo rm sdl2.deb
         
         sudo ../configure
