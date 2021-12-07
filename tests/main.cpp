@@ -10,7 +10,7 @@ using namespace av; // I don't care.
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) {
     log::set_level<log_level::error>();
     log::msg<log_level::debug>("Can't see me.");
-    log::msg<log_level::error>("Notice me!");
+    log::msg<log_level::error>("Notice me senpai~!");
 
     log::set_level<log_level::debug>();
     log::msg<log_level::debug>("Size of input_manager: %d", sizeof(input_manager));

@@ -40,8 +40,8 @@ namespace av {
         static constexpr prefix prefixes[4] = {
             {"34", 9, "[I] "},
             {"33", 14, "[W] "},
-            {"31", 12, "[E] "}, 
-            {"30;1", 8, "[D] "} // "Bright Black" lmao
+            {"31", 12, "[E] "},
+            {"30;1", 8, "[D] "}
         };
 
         #ifdef _WIN32
@@ -70,7 +70,7 @@ namespace av {
             printf(prefixes[(int)T_level].pref);
             SetConsoleTextAttribute(win_console, win_def_color);
             #else
-            printf("\u001B[%cm%c\u001B[0m", prefixes[(int)level].ansi, prefixes[(int)level].pref);
+            printf("\u001B[%sm%s\u001B[0m", prefixes[(int)T_level].ansi, prefixes[(int)T_level].pref);
             #endif
 
             printf(str, std::forward<T_args>(args)...);
