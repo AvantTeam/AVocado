@@ -29,8 +29,8 @@ namespace av {
 
         attributes(attributes),
         max_vertices(0),
-        max_indices(0),
-        has_indices(false),
+        max_elements(0),
+        has_elements(false),
 
         vertex_buffer([&]() -> unsigned int {
         unsigned int vertex_buffer;
@@ -39,7 +39,7 @@ namespace av {
         return vertex_buffer;
     }()),
 
-        index_buffer([&]() -> unsigned int {
+        element_buffer([&]() -> unsigned int {
         unsigned int index_buffer;
         glGenBuffers(1, &index_buffer);
 
@@ -48,13 +48,13 @@ namespace av {
 
     mesh::~mesh() {
         glDeleteBuffers(1, &vertex_buffer);
-        glDeleteBuffers(1, &index_buffer);
+        glDeleteBuffers(1, &element_buffer);
     }
 
     void mesh::render(const shader &program, int primitive_type, size_t offset, size_t count, bool auto_bind) const {
         if(auto_bind) bind(program);
 
-        if(has_indices) {
+        if(has_elements) {
             glDrawElements(primitive_type, count, GL_UNSIGNED_SHORT, (void *)offset);
         } else {
             glDrawArrays(primitive_type, offset, count);
@@ -76,13 +76,13 @@ namespace av {
             off += attr.size;
         }
         
-        if(has_indices) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+        if(has_elements) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer);
     }
 
     void mesh::unbind(const shader &program) const {
         for(const vert_attribute &attr : attributes) glDisableVertexAttribArray(program.attribute_loc(attr.name));
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        if(has_indices) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        if(has_elements) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 }

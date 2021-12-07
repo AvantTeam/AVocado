@@ -3,8 +3,8 @@
 
 namespace av {
     shader::shader(const char *vertex_source, const char *fragment_source, std::initializer_list<std::string> frag_datas):
-        vertex_shader(create_shader(GL_VERTEX_SHADER, vertex_source)),
-        fragment_shader(create_shader(GL_FRAGMENT_SHADER, fragment_source)),
+        vertex_shader(create_shader<GL_VERTEX_SHADER>(vertex_source)),
+        fragment_shader(create_shader<GL_FRAGMENT_SHADER>(fragment_source)),
 
         color_attachments([&]() -> int {
         int size = frag_datas.size();
@@ -41,25 +41,6 @@ namespace av {
         glDeleteProgram(program);
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
-    }
-
-    unsigned int shader::create_shader(int type, const char *source) const {
-        unsigned int shader = glCreateShader(type);
-        if(!shader) return 0;
-
-        glShaderSource(shader, 1, &source, nullptr);
-        glCompileShader(shader);
-
-        int compiled;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-        
-        log_shader(shader);
-        if(!compiled) {
-            glDeleteShader(shader);
-            return 0;
-        } else {
-            return shader;
-        }
     }
 
     void shader::log_shader(unsigned int shader) const {

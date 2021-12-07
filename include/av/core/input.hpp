@@ -152,13 +152,20 @@ namespace av {
                 }
             }
 
+            /**
+             * @brief Sets the continuous state of this key bind. Only valid for `dimension::single`.
+             * 
+             * @param continuous Whether the input callback should be called every frame on key down or single calls each
+             * key down or key release.
+             */
             inline void set_continuous(bool continuous) {
                 if(type != dimension::single) throw std::runtime_error("Continuous keyboard bind is only valid on single binds.");
                 keys[1] = continuous;
             }
 
+            /** @return Whether this key bind is continuous. Only valid for `dimension::single`. */
             inline bool is_continuous() const {
-                return type == dimension::single && keys[1];
+                return keys[1];
             }
         } keyboard;
     };
