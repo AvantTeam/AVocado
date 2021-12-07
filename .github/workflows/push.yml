@@ -12,17 +12,9 @@ jobs:
     - name: Build
       run: |
         sudo apt-get update
-        sudo apt-get install g++ cmake
+        sudo apt-get install cmake libsdl2-dev pkg-config
         
-        sudo git clone https://github.com/libsdl-org/SDL
-        cd SDL
-        sudo mkdir build
-        cd build
-        sudo ../configure
-        sudo make
-        sudo make install
-        
-        cd ../../
+        sudo pkg-config --libs sdl2
         
         sudo git clone https://github.com/skypjack/entt.git
         cd entt
