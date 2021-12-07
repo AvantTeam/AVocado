@@ -11,14 +11,14 @@ jobs:
     - name: Build
       run: |
         sudo apt-get update
-        sudo apt-get install g++ cmake gdebi-core
+        sudo apt-get install g++ cmake libsdl2-dev
+        sudo apt-get upgrade
+        sudo apt-get dist-upgrade
+        sudo do-release-upgrade
+        sudo apt-get update
+        sudo apt-get upgrade
         
-        curl -L "http://mirrors.kernel.org/ubuntu/pool/universe/libs/libsdl2/libsdl2-dev_2.0.14+dfsg2-3_amd64.deb" -o sdl2-dev.deb
-        curl -L "http://mirrors.kernel.org/ubuntu/pool/main/libs/libsdl2/libsdl2-2.0-0_2.0.14+dfsg2-3_amd64.deb" -o sdl2.deb
-        sudo gdebi sdl2.deb
-        sudo gdebi sdl2-dev.dev
-        sudo rm sdl2.deb
-        sudo rm sdl2-dev.deb
+        
         
         sudo ../configure
         sudo cmake --build . --target install
