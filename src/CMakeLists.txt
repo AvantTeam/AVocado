@@ -31,7 +31,16 @@ set(avutil_SOURCES
     util/log.cpp
 )
 
-foreach(SUBMODULE avcore avutil)
+set(packer_HEADERS
+    ../include/stb/stb_image.h
+    ../include/stb/stb_image_write.h
+)
+
+set(packer_SOURCES
+    packer/packer.cpp
+)
+
+foreach(SUBMODULE avcore avutil packer)
     add_library(${SUBMODULE} ${${SUBMODULE}_HEADERS} ${${SUBMODULE}_SOURCES})
     add_library(AVocado::${SUBMODULE} ALIAS ${SUBMODULE})
 
@@ -63,5 +72,4 @@ target_link_libraries(avcore
         SDL2::SDL2main SDL2::SDL2-static
 )
 
-add_executable(packer packer/packer.cpp)
 target_compile_features(packer PUBLIC cxx_std_17)
