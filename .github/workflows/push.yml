@@ -25,5 +25,7 @@ jobs:
         sudo mkdir out
         cd out
         
+        sudo apt-cache policy libsdl2-dev
+        
         sudo cmake ..
         sudo cmake --build . --target install
