@@ -18,7 +18,6 @@ jobs:
         
         sudo git clone https://github.com/skypjack/entt.git
         cd entt
-        sudo mkdir build
         cd build
         
         sudo cmake ..
