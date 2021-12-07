@@ -14,7 +14,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install cmake libsdl2-dev libglm-dev
         
-        curl -L "https://raw.githubusercontent.com/aminosbh/sdl2-cmake-modules/master/FindSDL2.cmake" -o FindSDL2.cmake
+        curl -L "https://raw.githubusercontent.com/aminosbh/sdl2-cmake-modules/master/FindSDL2.cmake" -o av/core/FindSDL2.cmake
         
         sudo git clone https://github.com/skypjack/entt.git
         cd entt
