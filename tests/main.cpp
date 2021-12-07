@@ -33,7 +33,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) {
         vert_attribute::color_packed.name.c_str()
     );
 
-    app process;
+    app_config config;
+    config.vsync = true;
+
+    app process(config);
     if(!process.has_initialized()) return 1;
 
     class listener: public app_listener {
@@ -86,7 +89,7 @@ void main() {
             model_shader.use();
             model.render(model_shader, GL_TRIANGLES, 0, model.get_max_indices());
 
-            SDL_SetWindowTitle(process.get_window(), std::string("Delta time: ").append(std::to_string(process.get_time().delta())).c_str());
+            SDL_SetWindowTitle(process.get_window(), std::string("FPS: ").append(std::to_string(1.0f / process.get_time().delta())).c_str());
         }
 
         void dispose(app &) override {
