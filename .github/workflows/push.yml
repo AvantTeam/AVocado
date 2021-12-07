@@ -15,14 +15,14 @@ jobs:
         
         sudo git clone https://github.com/skypjack/entt.git
         cd entt
-        mkdir out
+        sudo mkdir out
         cd out
         
         sudo cmake ..
         sudo cmake --install .
         
         cd ../../
-        mkdir out
+        sudo mkdir out
         cd out
         
         sudo cmake ..
