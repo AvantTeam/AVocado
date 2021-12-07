@@ -27,6 +27,8 @@ jobs:
         sudo mkdir build
         cd build
         
+        sudo cmake ..
+        sudo cmake --build . --target install
         sudo cmake -DBUILD_TESTS=ON ..
         sudo cmake --build . --target install
  
