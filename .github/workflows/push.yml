@@ -29,3 +29,4 @@ jobs:
         
         sudo cmake -DBUILD_TESTS=ON ..
         sudo cmake --build . --target install
+ 
