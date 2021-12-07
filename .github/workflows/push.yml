@@ -1,3 +1,4 @@
+
 name: Tests
 
 on: [push, workflow_dispatch]
@@ -10,11 +11,15 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build
       run: |
-        sudo sed -e '$s/Prompt=lts/Prompt=normal/' /etc/update-manager/release-upgrades | sudo tee -a /etc/update-manager/release-upgrades
-        sudo do-release-upgrade
         sudo apt-get update
-        sudo apt-get install g++ cmake libsdl2-dev
+        sudo apt-get install g++ cmake gdebi-core
         
+        curl -L "http://mirrors.kernel.org/ubuntu/pool/universe/libs/libsdl2/libsdl2-dev_2.0.14+dfsg2-3_amd64.deb" -o sdl2-dev.deb
+        curl -L "http://mirrors.kernel.org/ubuntu/pool/main/libs/libsdl2/libsdl2-2.0-0_2.0.14+dfsg2-3_amd64.deb" -o sdl2.deb
+        curl -L "http://mirrors.kernel.org/ubuntu/pool/main/g/glibc/libc6_2.34-0ubuntu3_amd64.deb" -o libc6.deb
+        sudo gdebi libc6.deb
+        sudo gdebi sdl2.deb
+        sudo gdebi sdl2-dev.dev
         
         sudo ../configure
         sudo cmake --build . --target install
