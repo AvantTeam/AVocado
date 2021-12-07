@@ -11,21 +11,30 @@ jobs:
     - name: Build
       run: |
         sudo apt-get update
-        sudo apt install g++ cmake libsdl2-dev libglm-dev
+        sudo apt-get install g++ cmake
+        
+        sudo git clone https://github.com/libsdl-org/SDL.git
+        cd SDL
+        sudo mkdir build
+        cd build
+        
+        cmake ..
+        ../configure
+        cmake --build . --install .
+        
+        cd ../../
         
         sudo git clone https://github.com/skypjack/entt.git
         cd entt
-        sudo mkdir out
-        cd out
+        sudo mkdir build
+        cd build
         
         sudo cmake ..
         sudo cmake --install .
         
         cd ../../
-        sudo mkdir out
-        cd out
+        sudo mkdir build
+        cd build
         
-        sudo apt-cache policy libsdl2-dev
-        
-        sudo cmake ..
+        sudo cmake -DBUILD_TESTS=ON ..
         sudo cmake --build . --target install
