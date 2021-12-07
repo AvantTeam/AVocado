@@ -12,9 +12,16 @@ jobs:
     - name: Build
       run: |
         sudo apt-get update
-        sudo apt-get install cmake libsdl2-dev libglm-dev
+        sudo apt-get install cmake libglm-dev
         
-        curl -L "https://raw.githubusercontent.com/aminosbh/sdl2-cmake-modules/master/FindSDL2.cmake" -o src/FindSDL2.cmake
+        git clone https://github.com/libsdl-org/SDL
+        cd SDL
+        mkdir build
+        cd build
+        ../configure
+        make
+        sudo make install
+        cd ../..
         
         sudo git clone https://github.com/skypjack/entt.git
         cd entt
