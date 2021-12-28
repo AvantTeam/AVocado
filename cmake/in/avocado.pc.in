@@ -1,0 +1,9 @@
+prefix=@PREFIX@
+exec_prefix=@EXEC_PREFIX@
+libdir=@LIB_DIR@
+includedir=@INCLUDE_DIR@
+
+Name: avocado
+Description: The AVocado framework core module.
+Version: @VERSION@
+Cflags: -I@INCLUDE_DIR@
