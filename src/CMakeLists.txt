@@ -9,13 +9,17 @@ set(avocado_HEADERS
     av/glad.h
     av/khrplatform.h
 
+    av/input.hpp
     av/log.hpp
+    av/math.hpp
+    av/time.hpp
 )
 
 set(avocado-sdl_HEADERS
     av_sdl/glad_impl.h
 
     av_sdl/app.hpp
+    av_sdl/input.hpp
 )
 
 foreach(COMP avocado avocado-sdl)

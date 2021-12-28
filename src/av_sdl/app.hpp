@@ -2,7 +2,10 @@
 #define AVSDL_APPLICATION_HPP
 
 #include "glad_impl.h"
+#include "input.hpp"
+
 #include <av/log.hpp>
+#include <av/time.hpp>
 
 #include <SDL2/SDL.h>
 
@@ -11,6 +14,10 @@
 #include <vector>
 
 namespace av {
+    /**
+     * @brief A non copy-constructible class defining an application. Should only be instantiated once. Holds an SDL
+     * window, an OpenGL context, and dynamic listeners.
+     */
     class sdl_app {
         public:
         struct config;
@@ -18,15 +25,34 @@ namespace av {
         using listener_t = std::function<void(sdl_app &)>;
 
         private:
+        /** @brief Whether the main loop should end. */
         bool exitting;
 
+        /** @brief The SDL window this application holds. **/
         SDL_Window *window;
+        /** @brief The OpenGL context this application holds. **/
         SDL_GLContext gl_context;
 
+        /** @brief The SDL input event manager of the application. */
+        sdl_input input;
+        /** @brief Global time manager of the application. */
+        time_manager time;
+
+        /** @brief The application loop listeners. */
         std::vector<listener_t> loop_listeners;
+        /** @brief The application exit listeners. */
         std::vector<listener_t> exit_listeners;
 
         public:
+        sdl_app(const sdl_app &from) = delete;
+
+        /**
+         * @brief Instantiates an application.
+         *
+         * @param init   The initial function to be invoked after creating an OpenGL context, , in a signature of
+                         `void(sdl_app &)`.
+         * @param config The application configuration.
+         */
         sdl_app(const listener_t &init, const config &conf):
             exitting(false),
 
@@ -69,34 +95,67 @@ namespace av {
                     if(e.type == SDL_QUIT) {
                         exitting = true;
                     } else {
-                        // input.read(e)
+                        input.read(e);
                     }
                 }
 
-                for(const listener_t &listener : loop_listeners) listener(*this);
+                time.update({0, 1});
+                input.update();
 
+                for(const listener_t &listener : loop_listeners) listener(*this);
                 SDL_GL_SwapWindow(window);
             }
 
             for(const listener_t &listener : exit_listeners) listener(*this);
         }
 
+        /** @brief Destroys the application. The OpenGL context the SDL window are destroyed here. */
         ~sdl_app() {
             if(gl_context) SDL_GL_DeleteContext(gl_context);
             if(window) SDL_DestroyWindow(window);
             SDL_Quit();
         }
 
+        /**
+         * @brief Adds a listener function bound to the main-loop.
+         * @param listener The listener function, in a signature of `void(sdl_app &)`.
+         */
         inline void on_loop(const listener_t &listener) { loop_listeners.push_back(listener); }
+        /**
+         * @brief Adds a listener function bound to application disposal.
+         * @param listener The listener function, in a signature of `void(sdl_app &)`.
+         */
         inline void on_exit(const listener_t &listener) { exit_listeners.push_back(listener); }
 
+        /** @brief Exits the application, breaking the main-loop. */
         inline void exit() { exitting = true; }
+
+        /** @return The SDL window this application holds. */
+        inline SDL_Window *get_window() const { return window; }
+        /** @return The OpenGL context this application holds. */
+        inline SDL_GLContext get_context() const { return gl_context; }
+
+        /** @return The application's input manager. */
+        inline sdl_input &get_input() { return input; }
+        /** @return The (read-only) application's input manager. */
+        inline const sdl_input &get_input() const { return input; }
+
+        /** @return The application's time manager. */
+        inline time_manager &get_time() { return time; }
+        /** @return The (read-only) application's time manager. */
+        inline const time_manager &get_time() const { return time; }
         
+        /** @brief An application configuration, for creation of SDL windows. */
         struct config {
+            /** @brief Window title. */
             const char *title = "";
+            /** @brief Window dimension. */
             int width = 800, height = 600;
+            /** @brief Whether to turn on VSync at startup or not. */
             bool vsync = true;
+            /** @brief FPS cap. Set to `0` to disable. */
             int fps_cap = 0;
+            /** @brief Window flags. */
             bool shown = true, fullscreen, resizable;
         };
     };
