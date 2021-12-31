@@ -1,4 +1,3 @@
-project(Tests LANGUAGES CXX)
 add_executable(Tests
     main.cpp
 )

@@ -11,6 +11,7 @@ set(avocado_HEADERS
     av/stb_image.h
     av/stb_image_write.h
 
+    av/bin_pack.hpp
     av/input.hpp
     av/io.hpp
     av/log.hpp

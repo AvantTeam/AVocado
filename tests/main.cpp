@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
             pixmap pix(32, 32);
             for(int y = 0; y < 32; y++) {
                 for(int x = 0; x < 32; x++) {
-                    pix.draw(x, y, color((x + 1) / 32.0f, (y + 1) / 32.0f, 1.0f, 1.0f).int_bits(), false);
+                    pix.draw(x, y, color{(x + 1) / 32.0f, (y + 1) / 32.0f, 1.0f, 1.0f}.int_bits(), false);
                 }
             }
             atlas->put("player", texture_region(*new texture_2D(32, 32, pix.buf())));
