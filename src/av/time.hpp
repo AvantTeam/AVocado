@@ -17,7 +17,7 @@ namespace av {
 
         /** @brief The time values. */
         std::vector<float> times;
-        
+
         public:
         /**
          * @brief Constructs a time manager with initial time values.
