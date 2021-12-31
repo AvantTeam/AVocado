@@ -46,9 +46,9 @@ namespace av {
         T width;
         T height;
 
-        rect_size(): width(static_cast<T>(0)), height(static_cast<T>(0)) {}
-        rect_size(T size): width(size), height(size) {}
-        rect_size(T width, T height): width(width), height(height) {}
+        constexpr rect_size(): width(static_cast<T>(0)), height(static_cast<T>(0)) {}
+        constexpr rect_size(T size): width(size), height(size) {}
+        constexpr rect_size(T width, T height): width(width), height(height) {}
     };
 
     template<typename T = float>
@@ -59,8 +59,8 @@ namespace av {
         T y = 0;
         T width = 0;
         T height = 0;
-
-        bool contained_in(const rect &other) const {
+        
+        constexpr inline bool contained_in(const rect &other) const {
             return
                 x >= other.x && y >= other.y &&
                 x + width <= other.x + other.width &&

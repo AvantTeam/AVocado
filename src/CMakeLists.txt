@@ -8,11 +8,22 @@ include(CMakePackageConfigHelpers)
 set(avocado_HEADERS
     av/glad.h
     av/khrplatform.h
+    av/stb_image.h
+    av/stb_image_write.h
 
     av/input.hpp
+    av/io.hpp
     av/log.hpp
     av/math.hpp
     av/time.hpp
+
+    av/graphics/mesh.hpp
+    av/graphics/shader.hpp
+    av/graphics/texture.hpp
+
+    av/graphics/2d/pixmap.hpp
+    av/graphics/2d/sprite_batch.hpp
+    av/graphics/2d/texture_atlas.hpp
 )
 
 set(avocado-sdl_HEADERS

@@ -7,9 +7,9 @@
 #include <av/log.hpp>
 #include <av/time.hpp>
 
+#include <entt/signal/delegate.hpp>
 #include <SDL2/SDL.h>
 
-#include <functional>
 #include <stdexcept>
 #include <vector>
 
@@ -20,9 +20,21 @@ namespace av {
      */
     class sdl_app {
         public:
-        struct config;
+        /** @brief An application configuration, for creation of SDL windows. */
+        struct config {
+            /** @brief Window title. */
+            const char *title = "";
+            /** @brief Window dimension. */
+            int width = 800, height = 600;
+            /** @brief Whether to turn on VSync at startup or not. */
+            bool vsync = true;
+            /** @brief FPS cap. Set to `0` to disable. */
+            int fps_cap = 0;
+            /** @brief Window flags. */
+            bool shown = true, fullscreen, resizable;
+        };
 
-        using listener_t = std::function<void(sdl_app &)>;
+        using listener_t = entt::delegate<void(sdl_app &)>;
 
         private:
         /** @brief Whether the main loop should end. */
@@ -38,8 +50,8 @@ namespace av {
         /** @brief Global time manager of the application. */
         time_manager time;
 
-        /** @brief The application loop listeners. */
-        std::vector<listener_t> loop_listeners;
+        /** @brief The application update listeners. */
+        std::vector<listener_t> update_listeners;
         /** @brief The application exit listeners. */
         std::vector<listener_t> exit_listeners;
 
@@ -49,11 +61,13 @@ namespace av {
         /**
          * @brief Instantiates an application.
          *
-         * @param init   The initial function to be invoked after creating an OpenGL context, , in a signature of
+         * @tparam T_init The initializer function type.
+         * @param  init   The initial function to be invoked after creating an OpenGL context, , in a signature of
                          `void(sdl_app &)`.
-         * @param config The application configuration.
+         * @param  config The application configuration.
          */
-        sdl_app(const listener_t &init, const config &conf):
+        template<typename T_init>
+        sdl_app(const T_init &init, const config &conf):
             exitting(false),
 
             window([&]() {
@@ -102,7 +116,7 @@ namespace av {
                 time.update({0, 1});
                 input.update();
 
-                for(const listener_t &listener : loop_listeners) listener(*this);
+                for(const listener_t &listener : update_listeners) listener(*this);
                 SDL_GL_SwapWindow(window);
             }
 
@@ -117,15 +131,46 @@ namespace av {
         }
 
         /**
-         * @brief Adds a listener function bound to the main-loop.
-         * @param listener The listener function, in a signature of `void(sdl_app &)`.
+         * @brief Hooks an update listener function.
+         * @tparam T_func The function, in a signature of `void(sdl_app &)`.
          */
-        inline void on_loop(const listener_t &listener) { loop_listeners.push_back(listener); }
+        template<auto T_func>
+        inline void on_update() {
+            listener_t &listener = update_listeners.emplace_back();
+            listener.connect<T_func>();
+        }
         /**
-         * @brief Adds a listener function bound to application disposal.
-         * @param listener The listener function, in a signature of `void(sdl_app &)`.
+         * @brief Hooks an update listener member function.
+         * @tparam T_func     The function, in a signature of `void(sdl_app &)`.
+         * @tparam T_instance The instance type.
+         * @param  instance   The instance that the member function is bound to.
          */
-        inline void on_exit(const listener_t &listener) { exit_listeners.push_back(listener); }
+        template<auto T_func, typename T_instance>
+        inline void on_update(T_instance &instance) {
+            listener_t &listener = update_listeners.emplace_back();
+            listener.connect<T_func>(instance);
+        }
+
+        /**
+         * @brief Hooks a disposal listener function.
+         * @tparam T_func The function, in a signature of `void(sdl_app &)`.
+         */
+        template<auto T_func>
+        inline void on_exit() {
+            listener_t &listener = exit_listeners.emplace_back();
+            listener.connect<T_func>();
+        }
+        /**
+         * @brief Hooks a disposal listener member function.
+         * @tparam T_func     The function, in a signature of `void(sdl_app &)`.
+         * @tparam T_instance The instance type.
+         * @param  instance   The instance that the member function is bound to.
+         */
+        template<auto T_func, typename T_instance>
+        inline void on_exit(T_instance &instance) {
+            listener_t &listener = exit_listeners.emplace_back();
+            listener.connect<T_func>(instance);
+        }
 
         /** @brief Exits the application, breaking the main-loop. */
         inline void exit() { exitting = true; }
@@ -144,20 +189,6 @@ namespace av {
         inline time_manager &get_time() { return time; }
         /** @return The (read-only) application's time manager. */
         inline const time_manager &get_time() const { return time; }
-        
-        /** @brief An application configuration, for creation of SDL windows. */
-        struct config {
-            /** @brief Window title. */
-            const char *title = "";
-            /** @brief Window dimension. */
-            int width = 800, height = 600;
-            /** @brief Whether to turn on VSync at startup or not. */
-            bool vsync = true;
-            /** @brief FPS cap. Set to `0` to disable. */
-            int fps_cap = 0;
-            /** @brief Window flags. */
-            bool shown = true, fullscreen, resizable;
-        };
     };
 }
 

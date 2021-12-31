@@ -1,10 +1,12 @@
 #ifndef AV_INPUT_HPP
 #define AV_INPUT_HPP
 
+#include <entt/signal/delegate.hpp>
 #include <SDL2/SDL.h>
 
 #include <av/math.hpp>
 
+#include <functional>
 #include <stdexcept>
 #include <string>
 #include <map>
@@ -62,7 +64,7 @@ namespace av {
         /** @brief Binds to keyboard key presses and releases. */
         keyboard,
         /** @brief Internally used value, used as this enum's member count. */
-        all
+        member_count
     };
 
     /**
@@ -71,14 +73,20 @@ namespace av {
      */
     union key_bind {
         /** @brief Defines a key stroke callback, in a signature of `void(const input_value &)`. */
-        using key_callback = void(const input_value &);
-        /** @brief The key bind's callback function. Must be set up before registered. */
-        key_callback *callback = nullptr;
+        using callback_t = entt::delegate<void(const input_value &)>;
+        
+        /** @brief The key bind's data, containing callback and type. */
+        struct bind_data {
+            /** @brief The key bind's callback function. Must be set up before registered. */
+            callback_t callback;
+            /** @brief The key bind's type. */
+            key_type type;
+        } data;
 
         /** @brief Specification for mouse button binding. */
         struct mouse_button_bind {
             /** @brief Derived field for memory offset. */
-            key_callback *callback;
+            bind_data callback;
 
             /** @brief The mouse button. Must be one of `SDL_BUTTON_LEFT`, `SDL_BUTTON_MIDDLE`, or `SDL_BUTTON_RIGHT`. */
             unsigned char button;
@@ -87,7 +95,7 @@ namespace av {
         /** @brief Specification for keyboard binding. */
         struct keyboard_bind {
             /** @brief Derived field for memory offset. */
-            key_callback *callback;
+            bind_data callback;
 
             /** @brief Defines "key dimensions", that is to determine the input values' data based on key presses. */
             enum class dimension {
@@ -169,6 +177,49 @@ namespace av {
                 return keys[1];
             }
         } keyboard;
+
+        /** @brief Default constructor, does nothing. */
+        key_bind() {}
+        /** @brief Default copy-constructor, copies the values accordingly. */
+        key_bind(const key_bind &from) {
+            data.type = from.data.type;
+            switch(data.type) {
+                case key_type::mouse_button: mouse_button = from.mouse_button; break;
+                case key_type::mouse_wheel: break;
+                case key_type::keyboard: keyboard = from.keyboard; break;
+            }
+        }
+        /** @brief Default move-constructor, swaps the values. */
+        key_bind(key_bind &&from) {
+            from.swap(*this);
+        }
+        /** @brief Default destructor, destructs the callback. */
+        ~key_bind() {
+            data.callback.~callback_t();
+        }
+
+        /** @brief Default copy-assign operator, copies the values accordingly. */
+        key_bind &operator =(const key_bind &from) {
+            key_bind(from).swap(*this);
+            return *this;
+        }
+        /** @brief Default move-assign operator, swaps the values. */
+        key_bind &operator =(key_bind &&from) {
+            from.swap(*this);
+            return *this;
+        }
+
+        /** @brief Swaps this key bind with the other. Sets the other key bind's type to this one's. */
+        void swap(key_bind &other) {
+            other.data.type = data.type;
+            std::swap(data.callback, other.data.callback);
+
+            switch(data.type) {
+                case key_type::mouse_button: std::swap(mouse_button, other.mouse_button); break;
+                case key_type::mouse_wheel: break;
+                case key_type::keyboard: std::swap(keyboard, other.keyboard); break;
+            }
+        }
     };
 
     /**
@@ -183,7 +234,7 @@ namespace av {
     class input {
         protected:
         /** @brief Contains all named key binds. */
-        std::map<std::string, key_bind> binds[(int)key_type::all];
+        std::map<std::string, key_bind> binds[static_cast<int>(key_type::member_count)];
 
         /** @brief Contains pressed mouse buttons. Populated in `read(const SDL_Event &e)`, cleared in `update()`. */
         std::unordered_set<unsigned char> mouse_down;
@@ -233,12 +284,12 @@ namespace av {
                         value.set(button);
                         value.performed = true;
 
-                        bind.callback(value);
+                        bind.data.callback(value);
                     } else if(mouse_up.find(button) != mouse_up.end()) {
                         value.set(button);
                         value.performed = false;
 
-                        bind.callback(value);
+                        bind.data.callback(value);
                     }
                 }
 
@@ -249,7 +300,7 @@ namespace av {
                 input_value value(mouse_wheel);
 
                 const auto &map = binds[static_cast<int>(key_type::mouse_wheel)];
-                for(const auto &[name, bind] : map) bind.callback(value);
+                for(const auto &[name, bind] : map) bind.data.callback(value);
 
                 mouse_wheeled = false;
             }
@@ -268,18 +319,18 @@ namespace av {
                                 value.set(key);
                                 value.performed = key_down.find(key) != key_down.end();
 
-                                bind.callback(value);
+                                bind.data.callback(value);
                             } else {
                                 if(key_down.find(key) != key_down.end()) {
                                     value.set(key);
                                     value.performed = true;
 
-                                    bind.callback(value);
+                                    bind.data.callback(value);
                                 } else if(key_up.find(key) != key_up.end()) {
                                     value.set(key);
                                     value.performed = false;
 
-                                    bind.callback(value);
+                                    bind.data.callback(value);
                                 }
                             }
                         } break;
@@ -296,12 +347,12 @@ namespace av {
                                 );
                                 value.performed = true;
 
-                                bind.callback(value);
+                                bind.data.callback(value);
                             } else {
                                 value.set(0.0f);
                                 value.performed = false;
 
-                                bind.callback(value);
+                                bind.data.callback(value);
                             }
                         } break;
 
@@ -324,12 +375,12 @@ namespace av {
                                 value.set(axis);
                                 value.performed = true;
 
-                                bind.callback(value);
+                                bind.data.callback(value);
                             } else {
                                 value.set(glm::vec2(0.0f, 0.0f));
                                 value.performed = false;
 
-                                bind.callback(value);
+                                bind.data.callback(value);
                             }
                         }
                     }
@@ -347,17 +398,17 @@ namespace av {
                     switch(keyboard.type) {
                         case dimension::single: if(keyboard.is_continuous()) {
                             value.set(keyboard.keys[0]);
-                            bind.callback(value);
+                            bind.data.callback(value);
                         } break;
 
                         case dimension::linear: {
                             value.set(0.0f);
-                            bind.callback(value);
+                            bind.data.callback(value);
                         } break;
 
                         default: {
                             value.set(glm::vec2(0.0f, 0.0f));
-                            bind.callback(value);
+                            bind.data.callback(value);
                         };
                     }
                 }
@@ -373,7 +424,7 @@ namespace av {
          */
         template<key_type T_type>
         inline key_bind &get(const std::string &name) {
-            static_assert(T_type != key_type::all, "`key_type::all` is not to be used externally.");
+            static_assert(T_type != key_type::member_count, "`key_type::all` is not to be used externally.");
 
             auto &map = binds[static_cast<int>(T_type)];
             if(map.find(name) == map.end()) {
@@ -392,7 +443,7 @@ namespace av {
          */
         template<key_type T_type>
         inline const key_bind &get(const std::string &name) const {
-            static_assert(T_type != key_type::all, "`key_type::all` is not to be used externally.");
+            static_assert(T_type != key_type::member_count, "`key_type::all` is not to be used externally.");
 
             const auto &map = binds[static_cast<int>(T_type)];
             if(map.find(name) == map.end()) {
@@ -406,20 +457,19 @@ namespace av {
          * @brief Registers a key bind by it's name and type.
          *
          * @tparam T_type The `key_type` of the key bind.
-         * @param name The key bind name.
-         * @param bind The key bind. This will be copied, so it is safe to allocate it in stack and discard it after.
-         * @return The reference to the (copy-constructed) key bind that has just been registered.
+         * @param  name The key bind name.
+         * @param  bind The key bind. This will be copied, so it is safe to allocate it in stack and discard it after.
+         * @return The reference to the (copy-constructed) key bind that has just been registered. Will throw an
+         *         exception if another key bind with the same type and name is already bound.
          */
-        template<key_type T_type>
         key_bind &bind(const std::string &name, const key_bind &bind) {
-            static_assert(T_type != key_type::all, "`key_type::all` is not to be used externally.");
-            if(!bind.callback) throw std::runtime_error("Key binds must have their callback functions setup.");
+            if(bind.data.type == key_type::member_count) throw std::runtime_error("`key_type::all` is not to be used externally.");
+            if(!bind.data.callback) throw std::runtime_error("Key binds must have their callback functions setup.");
 
-            auto &map = binds[static_cast<int>(T_type)];
-            if(map.find(name) != map.end()) {
+            auto &map = binds[static_cast<int>(bind.data.type)];
+            if(!map.emplace(name, bind).second) {
                 throw std::runtime_error(std::string("Key bind with identifier '").append(name).append("' already bound.").c_str());
             } else {
-                map.emplace(name, bind);
                 return map.at(name);
             }
         }
