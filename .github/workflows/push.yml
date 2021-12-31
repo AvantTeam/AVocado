@@ -1,0 +1,42 @@
+name: Tests
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: |
+        sudo apt-get update
+        sudo apt-get install cmake libopengl-dev libglu-dev libglm-dev
+        
+        sudo curl -L "http://mirrors.kernel.org/ubuntu/pool/universe/c/cxxopts/libcxxopts-dev_2.2.1-2_amd64.deb" -o cxxopts.deb
+        sudo dpkg -i cxxopts.deb
+        
+        sudo git clone https://github.com/libsdl-org/SDL
+        cd SDL
+        sudo mkdir build
+        cd build
+        sudo ../configure
+        sudo make
+        sudo make install
+        cd ../..
+        
+        sudo git clone https://github.com/skypjack/entt.git
+        cd entt
+        cd build
+        
+        sudo cmake ..
+        sudo cmake --install .
+        
+        cd ../../
+        sudo mkdir build
+        cd build
+        
+        sudo cmake ..
+        sudo cmake --build . --target install
+        sudo cmake -DBUILD_TESTS=ON ..
+        sudo cmake --build . --target install
