@@ -1,5 +1,5 @@
-#ifndef AV_GLFW_APP
-#define AV_GLFW_APP
+#ifndef AV_GLFW_APP_HPP
+#define AV_GLFW_APP_HPP
 
 #ifndef AV_OPENGL_ES
 #define AV_OPENGL_ES false
@@ -14,6 +14,8 @@
 
 #include <av/gl/gl.hpp>
 #include <GLFW/glfw3.h>
+
+#include <av/log.hpp>
 
 namespace av {
     class GLFW_App {
@@ -43,6 +45,7 @@ namespace av {
                 red_bits     = 8,
                 green_bits   = 8,
                 blue_bits    = 8,
+                alpha_bits   = 8,
                 depth_bits   = 0,
                 stencil_bits = 0;
 
@@ -50,8 +53,9 @@ namespace av {
         };
         
         struct GLFW_AppParams {
-            LogicCallback logic;
-            RenderCallback render;
+            RenderCallback
+                init,
+                render;
             
             GLFW_WindowParams window;
         };
@@ -66,7 +70,9 @@ namespace av {
                 glfwMakeContextCurrent(window);
                 glfwSwapInterval(1);
                 
-                AV_OPENGL_ES ? gladLoadGLES2Context(&gl, glfwGetProcAddress) : gladLoadGLContext(&gl, glfwGetProcAddress);
+                AV_OPENGL_ES ? gladLoadGLES2Context(gl, glfwGetProcAddress) : gladLoadGLContext(gl, glfwGetProcAddress);
+                
+                log("Initialized GL: %s", gl.getString(GL_VERSION));
             }
             
             GLFW_Context(const GLFW_Context &) = delete;
@@ -92,20 +98,43 @@ namespace av {
         };
         
         private:
-        bool initialized;
+        bool errored : 1, initialized : 1;
         
         public:
-        GLFW_App(GLFW_AppParams params): initialized(glfwInit()) {
-            if(!initialized) throw std::runtime_error("GLFW failed to initialize.");
-            
+        GLFW_App(GLFW_AppParams params): errored(false), initialized([]() -> bool {
             glfwSetErrorCallback([](int error, const char *description) {
                 throw std::runtime_error(std::string(std::to_string(error)) + std::string(": ") + description);
             });
             
-            GLFW_Context root_context = std::move(create_context(params.window));
-            while(!glfwWindowShouldClose(root_context.window)) {
-                glfwSwapBuffers(root_context.window);
-                glfwPollEvents();
+            try {
+                return glfwInit();
+            } catch(std::exception &e) {
+                log<LogLevel::error>("Failed to initialize GLFW: %s", e.what());
+                return false;
+            }
+        }()) {
+            if(!initialized){
+                errored = true;
+                return;
+            }
+            
+            int major, minor, rev;
+            glfwGetVersion(&major, &minor, &rev);
+            log("Initialized GLFW v%d.%d.%d", major, minor, rev);
+            
+            try {
+                GLFW_Context root_context = std::move(create_context(params.window));
+                if(params.init) params.init(root_context);
+                
+                while(!glfwWindowShouldClose(root_context.window)) {
+                    glfwSwapBuffers(root_context.window);
+                    glfwPollEvents();
+                }
+                
+                errored = false;
+            } catch(std::exception &e) {
+                log<LogLevel::error>("Exception thrown from main thread:\n%s", e.what());
+                errored = true;
             }
         }
         
@@ -116,13 +145,22 @@ namespace av {
             if(initialized) glfwTerminate();
         }
         
-        GLFW_Context create_context(GLFW_WindowParams params) {
+        bool is_errored() const {
+            return errored;
+        }
+        
+        static GLFW_Context create_context(GLFW_WindowParams params) {
             glfwWindowHint(GLFW_CLIENT_API, AV_OPENGL_ES ? GLFW_OPENGL_ES_API : GLFW_OPENGL_API);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            
+            #ifdef __APPLE__
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
+            #endif
             
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, params.gl_major);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, params.gl_minor);
             
+            glfwWindowHint(GLFW_DOUBLEBUFFER, true);
             glfwWindowHint(GLFW_RESIZABLE, params.resizable);
             glfwWindowHint(GLFW_VISIBLE, params.visible);
             glfwWindowHint(GLFW_DECORATED, params.decorated);
@@ -133,6 +171,8 @@ namespace av {
             glfwWindowHint(GLFW_RED_BITS, params.red_bits);
             glfwWindowHint(GLFW_GREEN_BITS, params.green_bits);
             glfwWindowHint(GLFW_BLUE_BITS, params.blue_bits);
+            glfwWindowHint(GLFW_ALPHA_BITS, params.alpha_bits);
+            
             glfwWindowHint(GLFW_DEPTH_BITS, params.depth_bits);
             glfwWindowHint(GLFW_STENCIL_BITS, params.stencil_bits); 
             

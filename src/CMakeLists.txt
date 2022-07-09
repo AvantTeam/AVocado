@@ -3,6 +3,7 @@ find_package(glfw3 3.3 REQUIRED)
 set(COMPS av_core av_glfw)
 
 set(av_core_SOURCES
+    av/log.hpp
     av/gl/gl.hpp
 )
 
