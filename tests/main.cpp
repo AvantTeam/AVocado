@@ -1,44 +1,29 @@
-#include <memory>
-
 #include <av/log.hpp>
 #include <av/glfw/app.hpp>
-#include <av/glfw/assets.hpp>
 
 using namespace av;
-
-std::unique_ptr<Assets> assets;
 
 struct Loader {
     static constexpr bool is_GL() noexcept {
         return false;
     }
     
-    static void load(Assets &assets, const AssetDesc &desc, int &asset) {
+    static void load(Assets &assets, const Assets::AssetDesc &desc, int &asset) {
         asset = 5;
     }
 };
 
 int main(int argc, char *argv[]) {
-    return GLFW_Run({
-        .init = [](const GLFW_Context &context) {
-            assets.reset(new Assets({
-                .window = context.window
-            }));
+    return app_create({
+        .init = []() {
             
-            assets->load<int, Loader>({
-                .path   = "path/to/asset",
-                .loaded = [](Assets &assets, void *asset_ptr, void *) {
-                    int asset = *static_cast<int *>(asset_ptr);
-                    log("The loaded asset is: %d.", asset);
-                }
-            });
         },
         
-        .dispose = [](const GLFW_Context &context) {
-            assets.reset();
+        .dispose = []() {
+            
         },
         
-        .render = [](const GLFW_Context &context) {
+        .render = []() {
             
         },
         

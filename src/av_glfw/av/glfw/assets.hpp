@@ -13,19 +13,9 @@
 #include <vector>
 
 #include <av/glfw/app.hpp>
+#include <av/glfw/glfw.hpp>
 
 namespace av {
-    class Assets;
-    
-    struct AssetDesc {
-        using LoadedCallback = std::add_pointer<void(Assets &, void *, void *)>::type;
-        
-        std::string path;
-        
-        void *loaded_userdata;
-        LoadedCallback loaded;
-    };
-    
     class Assets {
         public:
         struct AssetsParam {
@@ -33,6 +23,15 @@ namespace av {
             int
                 asset_threads = std::thread::hardware_concurrency(),
                 gl_threads = 1;
+        };
+        
+        struct AssetDesc {
+            using LoadedCallback = std::add_pointer<void(Assets &, void *, void *)>::type;
+            
+            std::string path;
+            
+            void *loaded_userdata;
+            LoadedCallback loaded;
         };
         
         private:
@@ -95,7 +94,7 @@ namespace av {
                             desc.load(*this, desc.desc, desc.asset);
                         }
                     } catch(std::exception &e) {
-                        GLFW_Err(e.what());
+                        app_err(e.what());
                     }
                 })));
             }
@@ -131,7 +130,7 @@ namespace av {
                                 desc.load(*this, desc.desc, desc.asset, desc.data, gl_context.gl);
                             }
                         } catch(std::exception &e) {
-                            GLFW_Err(e.what());
+                            app_err(e.what());
                         }
                     })));
                 }
