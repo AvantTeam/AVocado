@@ -3,12 +3,17 @@ find_package(glfw3 3.3 REQUIRED)
 set(COMPS av_core av_glfw)
 
 set(av_core_SOURCES
+    av/gl.hpp
     av/log.hpp
-    av/gl/gl.hpp
 )
 
 set(av_glfw_SOURCES
     av/glfw/app.hpp
+    av/glfw/assets.hpp
+    
+    av/glfw/gl/buffers.hpp
+    av/glfw/gl/mesh.hpp
+    av/glfw/gl/shader.hpp
 )
 
 include(GNUInstallDirs)
