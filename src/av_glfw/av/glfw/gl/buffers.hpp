@@ -1,20 +1,21 @@
 #ifndef AV_GLFW_GL_BUFFERS_HPP
 #define AV_GLFW_GL_BUFFERS_HPP
 
-#include <type_traits>
+#include <string>
 
 #include <av/gl.hpp>
+#include <av/glfw/app.hpp>
 
 namespace av {
     template<int T_buffer_type>
     struct Buffer {
+        private:
         GLuint bufID;
         
-        Buffer() {}
+        public:
+        Buffer(): bufID(0) {}
         
-        Buffer(const GL &gl) {
-            gl.genBuffers(1, &bufID);
-        }
+        Buffer(const GL &gl): bufID(create_buffer(gl)) {}
         
         Buffer(const Buffer &) = delete;
         
@@ -30,21 +31,38 @@ namespace av {
         }
         
         ~Buffer() {
-            if(bufID) gl.deleteBuffers(1, &bufID);
+            if(bufID) app_context().gl.deleteBuffers(1, &bufID);
         }
         
-        void bind(const GL &gl) const {
+        void init(const GL &gl) {
+            if(bufID) throw std::runtime_error("init() can only be called once for default-constructed buffer.");
+            bufID = create_buffer(gl);
+        }
+        
+        void bind(const GL &gl = app_context().gl) const {
             gl.bindBuffer(T_buffer_type, bufID);
         }
         
-        void data(const GL &gl, void *data, size_t size, bool bind = true, int usage = GL_STATIC_DRAW) const {
+        void data(void *data, size_t size, bool bind = true, int usage = GL_STATIC_DRAW, const GL &gl = app_context().gl) const {
             if(bind) bind(gl);
             gl.bufferData(T_buffer_type, size, data, usage);
         }
         
-        void sub_data(const GL &gl, void *data, size_t size, size_t offset, bool bind = true) const {
+        void sub_data(void *data, size_t size, size_t offset, bool bind = true, const GL &gl = app_context().gl) const {
             if(bind) bind(gl);
             gl.bufferSubData(T_buffer_type, offset, size, data);
+        }
+        
+        operator bool() const {
+            return bufID;
+        }
+        
+        private:
+        static GLuint create_buffer(const GL &gl) {
+            int id;
+            gl.genBuffers(1, &id);
+            
+            return id;
         }
     };
     

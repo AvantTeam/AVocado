@@ -10,6 +10,7 @@ set(av_core_SOURCES
 set(av_glfw_SOURCES
     av/glfw/app.hpp
     av/glfw/assets.hpp
+    av/glfw/glfw.hpp
     
     av/glfw/gl/buffers.hpp
     av/glfw/gl/mesh.hpp
