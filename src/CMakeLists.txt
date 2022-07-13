@@ -7,12 +7,12 @@ set(av_core_SOURCES
     av/gl.hpp
     av/globals.hpp
     av/log.hpp
-    
+
     av/gl/buffer.hpp
     av/gl/mesh.hpp
     av/gl/shader.hpp
     av/gl/texture.hpp
-    
+
     av/graphics/color.hpp
     av/graphics/pixmap.hpp
 )
@@ -39,7 +39,7 @@ foreach(COMP ${COMPS})
 endforeach()
 
 target_link_libraries(av_glfw INTERFACE
-    av_core glfw
+    glfw av_core pthread
 )
 
 configure_package_config_file(
