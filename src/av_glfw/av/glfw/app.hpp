@@ -15,91 +15,61 @@
 #include <mutex>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 
+#include <av/callback.hpp>
 #include <av/log.hpp>
 #include <av/glfw/glfw.hpp>
-
-namespace av {
-    using PostCallback = std::add_pointer<void(void *)>::type;
-    
-    void app_post(void *data, PostCallback callback);
-    
-    void app_err(const std::string &msg);
-}
-
 #include <av/glfw/assets.hpp>
+#include <av/glfw/globals_glfw.hpp>
 
 namespace av {
     struct GLFW_AppParams {
-        using AppCallback = std::add_pointer<void()>::type;
-        
-        AppCallback
+        Callback<void>
             init, dispose,
             render;
         
         GLFW_WindowParams window;
-        Assets::AssetsParam assets;
+        AssetsParam assets;
     };
     
     namespace {
-        struct Post {
-            void *data;
-            PostCallback callback;
-        };
-        
-        inline std::deque<Post> posts;
-        inline std::recursive_mutex post_lock;
+        inline std::deque<Callback<void>> posts;
+        inline std::mutex post_lock;
         
         inline bool exit = false;
         inline bool running = false;
-        
-        inline GLFW_Context context;
-        inline std::unique_ptr<Assets> assets;
     }
     
-    void app_post(void *data, PostCallback callback) {
+    void AV_post(const Callback<void> &callback) {
         if(!callback) return;
         
-        std::lock_guard lock(post_lock);
-        posts.push_back(std::move(Post{data, callback}));
+        std::lock_guard<std::mutex> lock(post_lock);
+        posts.push_back(std::move(callback));
     }
     
-    void app_err(const std::string &msg) {
+    void AV_err(const std::string &msg) {
         char *str = new char[msg.length() + 1];
         std::strcpy(str, msg.c_str());
         
-        app_post(str, [](void *str) {
+        AV_post({ [](void *str) {
             const char *msg = static_cast<const char *>(str);
             
             std::runtime_error err(msg);
             delete[] msg;
             
             throw err;
-        });
+        }, str });
     }
     
-    void app_exit() {
-        if(!running) throw std::runtime_error("There is no running application.");
+    void AV_exit() {
         exit = true;
     }
     
-    bool app_exiting() {
-        if(!running) throw std::runtime_error("There is no running application.");
+    bool AV_exiting() {
         return exit;
     }
     
-    GLFW_Context &app_context() {
-        if(!running) throw std::runtime_error("There is no running application.");
-        return context;
-    }
-    
-    Assets &app_assets() {
-        if(!running) throw std::runtime_error("There is no running application.");
-        return *assets;
-    }
-    
-    bool app_create(const GLFW_AppParams &param) {
+    bool AV_run(GLFW_AppParams param) {
         if(running) throw std::runtime_error("There already is a running application.");
         glfwSetErrorCallback([](int error, const char *description) {
             throw std::runtime_error(std::string(std::to_string(error)) + std::string(": ") + description);
@@ -107,9 +77,10 @@ namespace av {
         
         signal(SIGINT, [](int sig_num) {
             log<LogLevel::warn>("Interrupt signal raised; trying to exit...");
-            if(running) app_exit();
+            if(running) AV_exit();
         });
         
+        bool errored = false;
         try {
             running = true;
             exit = false;
@@ -120,42 +91,47 @@ namespace av {
             glfwGetVersion(&major, &minor, &rev);
             log("Initialized GLFW v%d.%d.%d", major, minor, rev);
             
-            context = std::move(GLFW_Context::create(param.window));
+            AV_set_root_context(GLFW_Context::create(param.window));
+            AV_init_assets(param.assets);
             
-            Assets::AssetsParam assets_param(std::move(param.assets));
-            assets_param.window = context.window;
-            
-            assets.reset(new Assets(assets_param));
+            GLFW_Context &context = AV_get_root_context();
             
             if(param.init) param.init();
             while(!(exit |= glfwWindowShouldClose(context.window))) {
                 {
-                    std::lock_guard lock(post_lock);
-                    while(!posts.empty()) {
-                        Post post = std::move(posts.front());
-                        posts.pop_front();
-                        
-                        post.callback(post.data);
-                    }
+                    Callback<void> post;
+                    while([&post]() {
+                        std::lock_guard<std::mutex> lock(post_lock);
+                        if(posts.empty()) {
+                            return false;
+                        } else {
+                            post = std::move(posts.front());
+                            posts.pop_front();
+                            
+                            return true;
+                        }
+                    }()) post();
                 }
                 
                 if(param.render) param.render();
-                
                 glfwSwapBuffers(context.window);
                 glfwPollEvents();
             }
             
-            if(param.dispose) param.dispose();
-            assets.reset();
-            
             running = false;
-            return false;
+            errored = false;
         } catch(std::exception &e) {
             log<LogLevel::error>("Exception thrown in the main thread: %s", e.what());
             
             running = false;
-            return true;
+            errored = true;
         }
+        
+        if(param.dispose) param.dispose();
+        AV_dispose_assets();
+        AV_reset_root_context();
+        
+        return errored;
     }
 }
 

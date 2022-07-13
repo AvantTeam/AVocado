@@ -5530,7 +5530,9 @@ GLAD_API_CALL int gladLoadGLES2Context(GL &context, GLADloadfunc load);
 #endif
 
 /* Source */
-#ifdef GLAD_GL_IMPLEMENTATION
+#if defined(GLAD_GL_IMPLEMENTATION) && !defined(GLAD_GL_IMPLEMENTED)
+#define GLAD_GL_IMPLEMENTED
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

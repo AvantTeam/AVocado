@@ -3,18 +3,18 @@
 using namespace av;
 
 int main(int argc, char *argv[]) {
-    return app_create({
-        .init = []() {
+    return AV_run({
+        .init = {[](void *) {
             
-        },
+        }},
         
-        .dispose = []() {
+        .dispose = {[](void *) {
             
-        },
+        }},
         
-        .render = []() {
+        .render = {[](void *) {
             
-        },
+        }},
         
         .window = {
             .title = "AVocado Testing Site",

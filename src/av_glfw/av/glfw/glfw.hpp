@@ -2,13 +2,12 @@
 #define AV_GLFW_GLFW_HPP
 
 #include <string>
-#include <type_traits>
 
 #include <GLFW/glfw3.h>
 
 #include <av/gl.hpp>
 
-namespace av {    
+namespace av {
     struct GLFW_WindowParams {
         std::string title;
 
@@ -44,7 +43,7 @@ namespace av {
         GLFW_Context(): window(NULL) {}
         
         GLFW_Context(const std::string &title, GLFWwindow *window): title(title), window(window) {
-            glfwMakeContextCurrent(window);
+            set_current();
             glfwSwapInterval(1);
             log("Created window %s", title.c_str());
             
@@ -81,7 +80,22 @@ namespace av {
             }
         }
         
-        static GLFW_Context create(GLFW_WindowParams param) {
+        void set_current() {
+            if(window) glfwMakeContextCurrent(window);
+        }
+        
+        void unset_current() {
+            if(glfwGetCurrentContext() == window) glfwMakeContextCurrent(NULL);
+        }
+        
+        static GLFW_Context create(const GLFW_WindowParams &param) {
+            return GLFW_Context(
+                param.title,
+                create_window(param)
+            );
+        }
+        
+        static GLFWwindow *create_window(const GLFW_WindowParams &param) {
             glfwWindowHint(GLFW_CLIENT_API, AV_OPENGL_ES ? GLFW_OPENGL_ES_API : GLFW_OPENGL_API);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             
@@ -104,11 +118,10 @@ namespace av {
             glfwWindowHint(GLFW_GREEN_BITS, param.green_bits);
             glfwWindowHint(GLFW_BLUE_BITS, param.blue_bits);
             glfwWindowHint(GLFW_ALPHA_BITS, param.alpha_bits);
-            
             glfwWindowHint(GLFW_DEPTH_BITS, param.depth_bits);
             glfwWindowHint(GLFW_STENCIL_BITS, param.stencil_bits); 
             
-            return GLFW_Context(param.title, glfwCreateWindow(param.width, param.height, param.title.c_str(), NULL, param.share));
+            return glfwCreateWindow(param.width, param.height, param.title.c_str(), NULL, param.share);
         }
     };
 }

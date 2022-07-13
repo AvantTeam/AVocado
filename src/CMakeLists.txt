@@ -3,25 +3,32 @@ find_package(glfw3 3.3 REQUIRED)
 set(COMPS av_core av_glfw)
 
 set(av_core_SOURCES
+    av/callback.hpp
     av/gl.hpp
+    av/globals.hpp
     av/log.hpp
+    
+    av/gl/buffer.hpp
+    av/gl/mesh.hpp
+    av/gl/shader.hpp
+    av/gl/texture.hpp
+    
+    av/graphics/color.hpp
+    av/graphics/pixmap.hpp
 )
 
 set(av_glfw_SOURCES
     av/glfw/app.hpp
     av/glfw/assets.hpp
     av/glfw/glfw.hpp
-    
-    av/glfw/gl/buffers.hpp
-    av/glfw/gl/mesh.hpp
-    av/glfw/gl/shader.hpp
+    av/glfw/globals_glfw.hpp
 )
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 foreach(COMP ${COMPS})
-    add_library(${COMP} INTERFACE)
+    add_library(${COMP} INTERFACE ${${COMP}_HEADERS})
     add_library(AVocado::${COMP} ALIAS ${COMP})
 
     target_compile_features(${COMP} INTERFACE cxx_std_20)
@@ -29,12 +36,6 @@ foreach(COMP ${COMPS})
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/${COMP}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
-
-    foreach(HEADER ${${COMP}_HEADERS})
-        target_sources(${COMP} INTERFACE
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/${COMP}/${HEADER}>
-        )
-    endforeach()
 endforeach()
 
 target_link_libraries(av_glfw INTERFACE

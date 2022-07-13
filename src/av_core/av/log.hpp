@@ -43,8 +43,8 @@ namespace av {
     }(log_win_console);
     #endif
     
-    template<LogLevel T_level = LogLevel::info, typename... T_args>
-    static inline void log(const char *str, T_args &&... args) {
+    template<LogLevel T_level = LogLevel::info, typename... T_ArgTypes>
+    static inline void log(const char *str, T_ArgTypes &&... args) {
         if(log_level == LogLevel::none || T_level > log_level) return;
         static constexpr const Prefix &prev = prefixes[static_cast<int>(T_level) - 1];
 
@@ -56,7 +56,7 @@ namespace av {
         printf("\u001B[%sm%s\u001B[0m", prev.ansi, prev.pref);
         #endif
 
-        printf(str, std::forward<T_args>(args)...);
+        printf(str, std::forward<T_ArgTypes>(args)...);
         printf("\n");
     }
 }
